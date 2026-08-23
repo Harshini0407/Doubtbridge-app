@@ -6,6 +6,8 @@ import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
 import { createServer as createViteServer } from 'vite';
 import { registerAuthRoutes } from './src/server/authRoutes';
+import { KNOWLEDGE_BASE } from './src/data/curriculumData';
+import type { KnowledgeChunk } from './src/types';
 
 dotenv.config();
 
@@ -78,6 +80,173 @@ async function generateWithModelFallback(params: {
 }
 
 // ==========================================
+// CURRICULUM GROUNDING HELPERS (for Adaptive Practice)
+// ==========================================
+
+// Finds textbook chunks matching this exact board + grade + subject (and chapter, if given).
+// Mirrors the isolation logic used by the Doubt Solver so Practice never mixes subjects.
+function findCurriculumChunks(board: string, subject: string, grade: string, chapter?: string): KnowledgeChunk[] {
+  const norm = (s: string) => (s || '').toLowerCase().trim();
+  let pool = KNOWLEDGE_BASE.filter(
+    (entry) =>
+      norm(entry.board) === norm(board) &&
+      norm(entry.grade) === norm(grade) &&
+      (norm(entry.subject) === norm(subject) ||
+        norm(subject).includes(norm(entry.subject)) ||
+        norm(entry.subject).includes(norm(subject)))
+  );
+  if (chapter) {
+    const chapterMatches = pool.filter((entry) => norm(entry.chapter).includes(norm(chapter)) || norm(chapter).includes(norm(entry.chapter)));
+    if (chapterMatches.length > 0) pool = chapterMatches;
+  }
+  return pool;
+}
+
+// Broad category so fallback/generated questions always stay on-topic for the chosen
+// subject — this is what stops a Social Studies practice session from ever surfacing
+// Physics/Chemistry style questions again.
+type SubjectCategory = 'math' | 'science' | 'social' | 'other';
+
+function categorizeSubject(subject: string): SubjectCategory {
+  const s = (subject || '').toLowerCase();
+  if (s.includes('social')) return 'social';
+  if (s.includes('math')) return 'math';
+  if (s.includes('science') || s.includes('evs') || s.includes('environmental')) return 'science';
+  return 'other';
+}
+
+// Plausible-but-wrong distractor statements, grouped by subject category, so fallback
+// questions never borrow a distractor from an unrelated subject.
+const WRONG_STATEMENT_POOL: Record<SubjectCategory, string[]> = {
+  math: [
+    'Dividing any number by zero always gives zero as the answer.',
+    'Changing the order of numbers always changes the result of addition.',
+    'A fraction with a larger denominator is always a larger number.',
+    'Rounding off a number always makes it more accurate than the original.',
+  ],
+  science: [
+    'Living things do not need energy to carry out their life processes.',
+    'All matter has exactly the same density, no matter its state.',
+    'Heat always flows from a colder object to a hotter one.',
+    'Plants can grow normally with no sunlight, water, or air at all.',
+  ],
+  social: [
+    'In a democracy, only wealthy citizens are allowed to vote.',
+    'A country\'s Constitution can never be changed once it is adopted.',
+    'Historians can only learn about the past from written manuscripts.',
+    'Every worker in the economy belongs to the same economic sector.',
+  ],
+  other: [
+    'This statement contradicts what the textbook chapter explains.',
+    'This is a common misconception, not what the chapter actually teaches.',
+    'This idea is not supported by the chapter content.',
+  ],
+};
+
+// Deterministic-ish shuffle so the correct option isn't always in the same slot,
+// while staying reproducible enough to reason about in tests.
+function placeCorrectAnswer(correct: string, distractors: string[], seed: number): { options: string[]; correctIndex: number } {
+  const options = [correct, ...distractors];
+  const correctIndex = seed % options.length;
+  const shuffled = [...options];
+  // Rotate the array so the correct answer lands at `correctIndex`.
+  const originalCorrectPos = 0;
+  const temp = shuffled.splice(originalCorrectPos, 1)[0];
+  shuffled.splice(correctIndex, 0, temp);
+  return { options: shuffled, correctIndex };
+}
+
+// Picks a real, textbook-grounded fact for the question — varying which part of the
+// chunk is used based on difficulty, so difficulty actually changes the question
+// (not just the label) and repeated "More Practice" calls surface different facts.
+function pickGroundedFact(chunk: KnowledgeChunk, difficulty: string, seed: number): string {
+  const candidates: string[] = [];
+  if (difficulty === 'Easy') {
+    if (chunk.simpleExplanation) candidates.push(chunk.simpleExplanation);
+    if (chunk.summaryPoints) candidates.push(...chunk.summaryPoints);
+  } else if (difficulty === 'Challenging') {
+    if (chunk.keyFormulas && chunk.keyFormulas.length > 0) {
+      candidates.push(`Key rule from ${chunk.chapter}: ${chunk.keyFormulas[seed % chunk.keyFormulas.length]}`);
+    }
+    if (chunk.example) candidates.push(chunk.example);
+    candidates.push(chunk.content);
+  } else {
+    if (chunk.summaryPoints) candidates.push(...chunk.summaryPoints);
+    candidates.push(chunk.content.split('. ').slice(0, 2).join('. ') + '.');
+  }
+  if (candidates.length === 0) candidates.push(chunk.content);
+  return candidates[seed % candidates.length];
+}
+
+// Builds curriculum-grounded fallback MCQs used only when the Gemini API is unavailable
+// (no key configured, or a transient failure). Every question is tied to a real,
+// board+grade+subject-matched textbook chunk when one exists, and even when no exact
+// chunk is on file yet, distractors are drawn from the correct subject category only —
+// so a Social Studies session never sees a Physics-style question again.
+function buildGroundedFallbackQuestions(params: {
+  board: string;
+  subject: string;
+  grade: string;
+  chapter?: string;
+  difficulty: string;
+}): any[] {
+  const { board, subject, grade, chapter, difficulty } = params;
+  const category = categorizeSubject(subject);
+  const wrongPool = WRONG_STATEMENT_POOL[category];
+  const matchedChunks = findCurriculumChunks(board, subject, grade, chapter);
+  const seedBase = Date.now();
+
+  if (matchedChunks.length > 0) {
+    const count = Math.min(3, Math.max(1, matchedChunks.length));
+    return Array.from({ length: count }).map((_, i) => {
+      const chunk = matchedChunks[(Math.floor(seedBase / 1000) + i) % matchedChunks.length];
+      const correctFact = pickGroundedFact(chunk, difficulty, seedBase + i);
+      const distractors = [wrongPool[i % wrongPool.length], wrongPool[(i + 1) % wrongPool.length], wrongPool[(i + 2) % wrongPool.length]];
+      const { options, correctIndex } = placeCorrectAnswer(correctFact, distractors, seedBase + i);
+      return {
+        id: `gen-${seedBase}-${i}`,
+        question: `According to ${chunk.textbook} — ${chunk.chapter}, which of these statements is correct?`,
+        options,
+        correctIndex,
+        hint: `Think about what ${chunk.section} explains about this topic.`,
+        explanation: chunk.simpleExplanation
+          ? `${chunk.simpleExplanation} ${chunk.example ? 'For example: ' + chunk.example : ''}`
+          : chunk.content,
+        difficulty,
+        subject,
+        grade,
+        chapter: chunk.chapter,
+      };
+    });
+  }
+
+  // No authored textbook chunk on file yet for this exact board/grade/subject/chapter —
+  // still stay strictly within the correct subject category rather than guessing content.
+  return [
+    {
+      id: `gen-${seedBase}-0`,
+      question: `We don't have this exact ${chapter ? `"${chapter}"` : ''} chapter loaded from your ${board} ${grade} ${subject} textbook yet. Which of these is a true statement in ${subject}?`,
+      options: placeCorrectAnswer(
+        `Correct answers in ${subject} always come from what your ${grade} textbook actually teaches.`,
+        [wrongPool[0], wrongPool[1], wrongPool[2]],
+        seedBase
+      ).options,
+      correctIndex: placeCorrectAnswer(
+        `Correct answers in ${subject} always come from what your ${grade} textbook actually teaches.`,
+        [wrongPool[0], wrongPool[1], wrongPool[2]],
+        seedBase
+      ).correctIndex,
+      hint: 'Try asking the Doubt Solver with your chapter name to add this topic to the practice set.',
+      explanation: `This topic isn't in the grounded question bank yet for ${board} ${grade} ${subject}. Ask about it in the Doubt Solver tab, or pick a different chapter/difficulty to keep practicing.`,
+      difficulty,
+      subject,
+      grade,
+      chapter: chapter || 'General Syllabus',
+    },
+  ];
+}
+
+// ==========================================
 // API ROUTES
 // ==========================================
 
@@ -121,6 +290,8 @@ Chapter: ${matchedChunk.chapter}
 Section: ${matchedChunk.section}
 Key Content:
 ${matchedChunk.content}
+${matchedChunk.simpleExplanation ? `Simple summary to draw from: ${matchedChunk.simpleExplanation}` : ''}
+${matchedChunk.example ? `Example to draw from: ${matchedChunk.example}` : ''}
 ${matchedChunk.keyFormulas ? `Key Formulas: ${matchedChunk.keyFormulas.join('; ')}` : ''}`
       : `CURRICULUM CONTEXT:
 Board: ${board}
@@ -129,13 +300,15 @@ Grade: ${grade}
 Strictly ground explanations in standard ${board} secondary syllabus level for ${grade}.`;
 
     const systemInstruction = `You are "DoubtBridge AI", an empathetic, patient, encouraging secondary school tutor for Indian ${board} ${grade} students studying ${subject}.
-YOUR CORE DIRECTIVES:
-1. Explain step-by-step in clear, accessible language suitable for a 14-16 year old student.
-2. If mathematical or scientific equations are involved, write out each step clearly.
-3. Language constraint: Respond entirely in ${targetLang}. If Telugu or Hindi, use standard student-friendly terms while keeping key scientific terms recognizable (you may include English transliteration in brackets if helpful).
-4. Use relatable real-life analogies (e.g. cricket, bicycles, kitchen cooking, village/city life) to make abstract ideas intuitive.
-5. End with 2-3 short, encouraging follow-up thought questions or suggestions.
-6. DO NOT make up fake external facts. Be truthful and grounded in the textbook curriculum.`;
+YOUR CORE DIRECTIVES — follow this exact structure and tone:
+1. Start with "🌟 In Simple Words" — explain the core idea in 1-2 short, everyday sentences with NO jargon, as if explaining to a curious younger sibling. Avoid dense technical wording here.
+2. Then "💡 Example" — give ONE short, concrete, relatable real-life example (or a simple worked mini-example with numbers) that makes the idea click.
+3. Then "📖 Step-by-Step" — now go into the fuller explanation, one clear step at a time, using simple sentences. Only use technical terms after you've first explained them simply. Write out every equation step if math/science is involved.
+4. Stay strictly on the topic of ${subject} for ${grade} — do not bring in unrelated subjects.
+5. Language: Respond entirely in ${targetLang}. If Telugu or Hindi, use everyday student-friendly words, keeping key scientific terms recognizable (English in brackets if helpful).
+6. Use relatable Indian everyday analogies (cricket, bicycles, kitchen cooking, market, mobile phones) wherever helpful.
+7. End with 2-3 short, encouraging follow-up questions or practice ideas.
+8. DO NOT make up facts. Stay grounded in the textbook curriculum. Never assume the student already knows advanced terms — always explain before using them.`;
 
     const prompt = `${excerptContext}
 
@@ -173,15 +346,21 @@ Provide a structured, step-by-step explanation grounded in the textbook for this
 
     // High-quality curriculum-grounded fallback if external AI is experiencing high demand spikes
     if (matchedChunk) {
-      let fallbackText = `### Step-by-Step Explanation (${matchedChunk.chapter} • ${matchedChunk.section})\n\n`;
-      fallbackText += `${matchedChunk.content}\n\n`;
+      let fallbackText = `### ${matchedChunk.chapter} • ${matchedChunk.section}\n\n`;
+      if (matchedChunk.simpleExplanation) {
+        fallbackText += `🌟 In Simple Words\n${matchedChunk.simpleExplanation}\n\n`;
+      }
+      if (matchedChunk.example) {
+        fallbackText += `💡 Example\n${matchedChunk.example}\n\n`;
+      }
+      fallbackText += `📖 A Bit More Detail\n${matchedChunk.content}\n\n`;
       if (matchedChunk.keyFormulas && matchedChunk.keyFormulas.length > 0) {
-        fallbackText += `**Key Formulas / Rules:**\n${matchedChunk.keyFormulas.map((f: string) => `• ${f}`).join('\n')}\n\n`;
+        fallbackText += `🔑 Key Formulas / Rules:\n${matchedChunk.keyFormulas.map((f: string) => `• ${f}`).join('\n')}\n\n`;
       }
       if (matchedChunk.summaryPoints && matchedChunk.summaryPoints.length > 0) {
-        fallbackText += `**Core Takeaways:**\n${matchedChunk.summaryPoints.map((p: string) => `✓ ${p}`).join('\n')}\n\n`;
+        fallbackText += `✅ Quick Recap:\n${matchedChunk.summaryPoints.map((p: string) => `• ${p}`).join('\n')}\n\n`;
       }
-      fallbackText += `💡 *Pedagogical Tip: Try practicing related questions in the Adaptive Practice tab to solidify this concept!*`;
+      fallbackText += `💡 *Tip: Try practicing related questions in the Adaptive Practice tab to solidify this concept!*`;
 
       return res.json({
         answer: fallbackText,
@@ -220,11 +399,34 @@ Provide a structured, step-by-step explanation grounded in the textbook for this
 
 // 2. AI Adaptive Practice Generator
 app.post('/api/ai/practice', async (req, res) => {
+  const { board, subject, grade, chapter, difficulty = 'Medium', recentMistakes = [] } = req.body;
   try {
-    const { board, subject, grade, chapter, difficulty = 'Medium', recentMistakes = [] } = req.body;
+    // Ground the generator in the actual matched textbook chunk(s), exactly like the
+    // Doubt Solver does — this is what stops the AI from drifting into the wrong
+    // subject or inventing facts that aren't in the syllabus.
+    const matchedChunks = findCurriculumChunks(board, subject, grade, chapter);
+    const groundingText =
+      matchedChunks.length > 0
+        ? `OFFICIAL TEXTBOOK EXCERPTS TO BASE QUESTIONS ON (do not invent facts outside these):\n${matchedChunks
+            .slice(0, 3)
+            .map(
+              (c) =>
+                `- Textbook: ${c.textbook} | Chapter: ${c.chapter} | Section: ${c.section}\n  Content: ${c.content}${
+                  c.keyFormulas ? `\n  Key Formulas: ${c.keyFormulas.join('; ')}` : ''
+                }${c.summaryPoints ? `\n  Key Points: ${c.summaryPoints.join('; ')}` : ''}`
+            )
+            .join('\n')}`
+        : `No exact textbook excerpt is on file yet for this chapter. Stay strictly within the standard ${board} ${grade} ${subject} syllabus — do not bring in concepts, vocabulary, or examples from any other subject.`;
 
     const prompt = `Generate 3 high-quality multiple choice practice questions for an Indian ${board} ${grade} student studying ${subject} (Topic: ${chapter || 'General'}).
 Difficulty level: ${difficulty}.
+${groundingText}
+
+CRITICAL RULES:
+- Every question, option, and explanation must be about ${subject} only — never mix in another subject's concepts.
+- Base questions strictly on the textbook excerpts above when they are provided.
+- Vary the 3 questions across different facts/sub-topics so they are not near-duplicates of each other.
+- Match the ${difficulty} difficulty level: Easy = direct recall of a single fact, Medium = applying a concept to a simple scenario, Challenging = multi-step reasoning or combining two facts.
 ${recentMistakes.length > 0 ? `Target these known student confusions: ${recentMistakes.join(', ')}` : ''}
 
 Format as a strict JSON array of objects with this schema:
@@ -257,70 +459,41 @@ Format as a strict JSON array of objects with this schema:
       try {
         parsed = JSON.parse(generatedText);
       } catch (pErr) {
-        console.warn('JSON parse error from Gemini, using fallback seeds');
+        console.warn('JSON parse error from Gemini, using grounded fallback');
       }
 
+      // Defense in depth: even if Gemini responds, discard any question that drifted
+      // to a different subject OR a different difficulty than what was requested —
+      // the model's own "difficulty" field is not trustworthy on its own, since it
+      // can echo the wrong label even when the prompt asked for a specific level.
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return res.json({ questions: parsed });
+        const onSubjectAndDifficulty = parsed
+          .filter((q: any) => !q.subject || String(q.subject).toLowerCase() === String(subject).toLowerCase())
+          .filter((q: any) => !q.difficulty || String(q.difficulty).toLowerCase() === String(difficulty).toLowerCase())
+          // Normalize every field to the values actually requested, so the UI never
+          // shows a question tagged with the wrong subject/grade/difficulty badge
+          // even if the model's JSON drifted slightly.
+          .map((q: any) => ({ ...q, subject, grade, difficulty }));
+        if (onSubjectAndDifficulty.length > 0) {
+          return res.json({ questions: onSubjectAndDifficulty });
+        }
       }
     }
 
-    // High quality calibrated practice question fallback
-    const fallbackQ = [
-      {
-        id: `gen-${Date.now()}-1`,
-        question: `In ${subject} (${grade}, ${board}), which of the following statements is scientifically and mathematically accurate regarding ${chapter || 'core principles'}?`,
-        options: [
-          'The fundamental laws of conservation remain satisfied in closed systems.',
-          'Energy is destroyed during endothermic reactions.',
-          'Acceleration is a scalar while speed is a vector.',
-          'Inertia decreases with increasing mass.'
-        ],
-        correctIndex: 0,
-        hint: 'Recall the core principle of conservation taught in textbook Chapter 1.',
-        explanation: 'According to the standard secondary curriculum, conservation laws (mass, energy, and momentum) hold true universally in isolated systems.',
-        difficulty: difficulty,
-        subject: subject,
-        grade: grade,
-        chapter: chapter || 'General Secondary Syllabus'
-      },
-      {
-        id: `gen-${Date.now()}-2`,
-        question: `When solving a problem on ${chapter || subject} at ${difficulty} level, what is the first critical step?`,
-        options: [
-          'Identify given quantities and convert all units into standard SI units.',
-          'Directly multiply arbitrary numbers without writing formulas.',
-          'Ignore the sign conventions for negative coordinates or directions.',
-          'Assume friction or resistance is infinite in all cases.'
-        ],
-        correctIndex: 0,
-        hint: 'Think about standard problem-solving methodology in board exams.',
-        explanation: 'Converting all given quantities to consistent SI units and applying the right formula prevents common arithmetic and unit errors.',
-        difficulty: difficulty,
-        subject: subject,
-        grade: grade,
-        chapter: chapter || 'General Secondary Syllabus'
-      }
-    ];
-
-    return res.json({ questions: fallbackQ });
+    // Gemini unavailable (no API key configured), returned nothing usable, or every
+    // question drifted off the requested subject/difficulty — use the curriculum-grounded,
+    // subject-and-difficulty-correct fallback generator instead.
+    return res.json({ questions: buildGroundedFallbackQuestions({ board, subject, grade, chapter, difficulty }) });
   } catch (err: any) {
     console.error('Handled error in /api/ai/practice:', err);
     return res.json({
-      questions: [
-        {
-          id: `gen-err-${Date.now()}`,
-          question: `Which fundamental principle applies to ${req.body?.subject || 'Science'} in ${req.body?.grade || 'Class 10'}?`,
-          options: ['Conservation of Energy and Mass', 'Arbitrary transformation without balance', 'Ignoring units in calculation', 'Spontaneous generation of matter'],
-          correctIndex: 0,
-          hint: 'Remember the core conservation law.',
-          explanation: 'Conservation laws are fundamental across secondary STEM curriculums.',
-          difficulty: req.body?.difficulty || 'Medium',
-          subject: req.body?.subject || 'Science',
-          grade: req.body?.grade || 'Class 10',
-          chapter: req.body?.chapter || 'General Chapter'
-        }
-      ]
+      questions: buildGroundedFallbackQuestions({
+        board: board || 'TSCERT',
+        subject: subject || 'Mathematics',
+        grade: grade || 'Class 10',
+        chapter,
+        difficulty: difficulty || 'Medium',
+      }),
     });
   }
 });
@@ -355,7 +528,7 @@ Generate a practical, actionable 10-Minute Remedial Intervention Plan with:
     // High quality teacher remedial plan fallback
     return res.json({
       insightPlan: `### 10-Minute Remedial Intervention Plan: ${topicName}
-**Class Context:** ${board} • ${grade} • ${subject} (${studentCount || '5+'} students needing direct attention)
+Class Context: ${board} • ${grade} • ${subject} (${studentCount || '5+'} students needing direct attention)
 
 ---
 #### 1. The Core Misconception
@@ -363,24 +536,24 @@ Students struggle with ${(strugglePoints || []).join(' and ') || 'the core chapt
 
 ---
 #### 2. 10-Minute Blackboard Action Script
-• **Minutes 1–3 (Visual Hook & Everyday Analogy):**
+• Minutes 1–3 (Visual Hook & Everyday Analogy):
   - Draw a split-board diagram. Connect the concept to a real-life analogy (e.g. balancing weighing scales in a grocery shop or light reflection from vehicle mirrors).
   - Highlight the single most common mistake in distinct color (e.g. negative sign errors, inverted fractions, or incorrect criss-cross valencies).
 
-• **Minutes 4–7 (Worked Model Problem with Choral Prompts):**
+• Minutes 4–7 (Worked Model Problem with Choral Prompts):
   - Solve 1 canonical textbook exemplar step-by-step on the board.
   - Pause at each critical arithmetic or scientific step and ask students to call out the next rule together.
 
-• **Minutes 8–10 (Rapid Slate Check & Turn-and-Talk):**
+• Minutes 8–10 (Rapid Slate Check & Turn-and-Talk):
   - Write 1 quick check problem on the board.
   - Give students 90 seconds to solve on slates/notebooks and hold up answers.
   - Provide immediate reinforcement and tag students who need extra guided support.
 
 ---
 #### 3. Scaffolded 3-Problem Worksheet
-1. **Level 1 (Foundation Confidence):** Direct substitution problem with all given parameters.
-2. **Level 2 (Core Curriculum Standard):** Two-step problem requiring variable rearrangement or formula synthesis.
-3. **Level 3 (Board Exam Application):** Applied multi-mark question modeled directly on recent ${board} SSC / Class 10 Board exam patterns.
+1. Level 1 (Foundation Confidence): Direct substitution problem with all given parameters.
+2. Level 2 (Core Curriculum Standard): Two-step problem requiring variable rearrangement or formula synthesis.
+3. Level 3 (Board Exam Application): Applied multi-mark question modeled directly on recent ${board} SSC / Class 10 Board exam patterns.
 
 ---
 #### 4. Differentiated Support & Peer-Tutoring Tip
@@ -389,7 +562,7 @@ Pair students who showed strong mastery in previous quizzes with struggling peer
   } catch (err: any) {
     console.error('Handled error in /api/ai/teacher-insight:', err);
     return res.json({
-      insightPlan: `### 10-Minute Remedial Plan: ${req.body?.topicName || 'Target Topic'}\n\n1. **Core Misconception:** Students confuse sign conventions and formula rearrangement.\n2. **Blackboard Hook:** Show a side-by-side comparison diagram.\n3. **Guided Practice:** Work 1 exemplar problem with student choral responses.\n4. **Worksheet:** 3 scaffolded problems (Basic, Intermediate, Board Exam level).`
+      insightPlan: `### 10-Minute Remedial Plan: ${req.body?.topicName || 'Target Topic'}\n\n1. Core Misconception: Students confuse sign conventions and formula rearrangement.\n2. Blackboard Hook: Show a side-by-side comparison diagram.\n3. Guided Practice: Work 1 exemplar problem with student choral responses.\n4. Worksheet: 3 scaffolded problems (Basic, Intermediate, Board Exam level).`
     });
   }
 });
@@ -429,7 +602,7 @@ Rules:
     }
 
     return res.json({
-      simplerExplanation: `Let's look at this with an everyday analogy: Think of **${topic}** like riding a bicycle. When you push the pedal with force, that force moves through the chain to the wheels. In the same way, in this topic, the inputs directly determine the balanced outcome according to the formula!`
+      simplerExplanation: `Let's look at this with an everyday analogy: Think of ${topic} like riding a bicycle. When you push the pedal with force, that force moves through the chain to the wheels. In the same way, in this topic, the inputs directly determine the balanced outcome according to the formula!`
     });
   } catch (err: any) {
     console.error('Handled error in /api/ai/explain-simpler:', err);
