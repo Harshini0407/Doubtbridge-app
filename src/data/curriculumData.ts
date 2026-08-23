@@ -1,48 +1,104 @@
 import { BoardId, GradeId, KnowledgeChunk, SubjectOption } from '../types';
 
 // Full supported class range for registration, login, and the doubt-solving selector.
-// NOTE: The grounded knowledge base (KNOWLEDGE_BASE below) currently only has authored
-// textbook content for Class 9 & 10. Classes 5-8 are fully supported for accounts,
-// login, and the Teacher Hub, but the AI doubt-solver will fall back to a
-// "not found in textbook" response for 5-8 until that content is added.
+// The grounded knowledge base (KNOWLEDGE_BASE below) now has authored textbook content
+// for Class 5-10 across NCERT and TSCERT (Telangana). English is intentionally excluded
+// from SUBJECTS — this app's Adaptive Practice / Doubt Solver only covers content
+// (non-language) subjects: EVS, Science, Social Science/Studies, and Mathematics.
 export const GRADE_OPTIONS: GradeId[] = ['Class 5', 'Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'];
 
 export const SUBJECTS: SubjectOption[] = [
-  // NCERT Subjects (Class 9 & 10)
+  // ==================== NCERT Subjects ====================
+  // Class 5 — EVS + Mathematics (no separate Science/Social split yet at this stage)
+  {
+    id: 'ncert-evs-5',
+    name: 'Environmental Studies',
+    board: 'NCERT',
+    grades: ['Class 5'],
+    iconName: 'Leaf',
+    description: 'Our surroundings, plants, animals, family & community (EVS)',
+  },
+  {
+    id: 'ncert-math-5',
+    name: 'Mathematics',
+    board: 'NCERT',
+    grades: ['Class 5'],
+    iconName: 'Calculator',
+    description: 'Numbers, shapes, fractions, and everyday measurement',
+  },
+
+  // Class 6-8 — Science & Social Science split out from EVS
   {
     id: 'ncert-science',
     name: 'Science',
     board: 'NCERT',
-    grades: ['Class 9', 'Class 10'],
+    grades: ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'],
     iconName: 'Atom',
     description: 'Physics, Chemistry, and Biology combined syllabus',
-  },
-  {
-    id: 'ncert-math',
-    name: 'Mathematics',
-    board: 'NCERT',
-    grades: ['Class 9', 'Class 10'],
-    iconName: 'Calculator',
-    description: 'Algebra, Geometry, Trigonometry, and Statistics',
   },
   {
     id: 'ncert-social',
     name: 'Social Science',
     board: 'NCERT',
-    grades: ['Class 9', 'Class 10'],
+    grades: ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'],
     iconName: 'Globe2',
-    description: 'History, Democratic Politics, Geography, and Economics',
+    description: 'History, Civics/Political Life, Geography, and Economics',
   },
   {
-    id: 'ncert-english',
-    name: 'English Language & Literature',
+    id: 'ncert-math',
+    name: 'Mathematics',
     board: 'NCERT',
-    grades: ['Class 9', 'Class 10'],
-    iconName: 'BookOpen',
-    description: 'Prose, Poetry, Reading Comprehension & Applied Grammar',
+    grades: ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'],
+    iconName: 'Calculator',
+    description: 'Algebra, Geometry, Trigonometry, and Statistics',
   },
 
-  // TSCERT Subjects (Class 9 & 10)
+  // ==================== TSCERT Subjects (Telangana) ====================
+  // Class 5 — EVS + Mathematics
+  {
+    id: 'tscert-evs-5',
+    name: 'Environmental Science',
+    board: 'TSCERT',
+    grades: ['Class 5'],
+    iconName: 'Leaf',
+    description: 'Telangana State EVS: surroundings, community, and nature',
+  },
+  {
+    id: 'tscert-math-5',
+    name: 'Mathematics',
+    board: 'TSCERT',
+    grades: ['Class 5'],
+    iconName: 'Calculator',
+    description: 'Numbers, shapes, fractions, and everyday measurement',
+  },
+
+  // Class 6-8 — General Science & Social Studies
+  {
+    id: 'tscert-general-science',
+    name: 'General Science',
+    board: 'TSCERT',
+    grades: ['Class 6', 'Class 7', 'Class 8'],
+    iconName: 'Atom',
+    description: 'Telangana State combined Physics, Chemistry & Biology syllabus',
+  },
+  {
+    id: 'tscert-social',
+    name: 'Social Studies',
+    board: 'TSCERT',
+    grades: ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'],
+    iconName: 'Landmark',
+    description: 'Our Earth, History, Civics, Production & Employment',
+  },
+  {
+    id: 'tscert-math-68',
+    name: 'Mathematics',
+    board: 'TSCERT',
+    grades: ['Class 6', 'Class 7', 'Class 8'],
+    iconName: 'Calculator',
+    description: 'Number systems, fractions, geometry & basic algebra',
+  },
+
+  // Class 9 & 10 — Physical & Biological Science split out
   {
     id: 'tscert-physics',
     name: 'Physical Science',
@@ -67,22 +123,6 @@ export const SUBJECTS: SubjectOption[] = [
     iconName: 'Calculator',
     description: 'Number theory, Coordinate Geometry, Polynomials & Trigonometry',
   },
-  {
-    id: 'tscert-social',
-    name: 'Social Studies',
-    board: 'TSCERT',
-    grades: ['Class 9', 'Class 10'],
-    iconName: 'Landmark',
-    description: 'Our Earth, Production & Employment, Democracy & Heritage',
-  },
-  {
-    id: 'tscert-english',
-    name: 'English',
-    board: 'TSCERT',
-    grades: ['Class 9', 'Class 10'],
-    iconName: 'BookOpen',
-    description: 'Telangana State SSC English Reader and Grammar',
-  },
 ];
 
 export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
@@ -97,6 +137,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '3.2 Atomic Mass & Law of Chemical Combination',
     keywords: ['atom', 'atomic mass', 'molecule', 'element', 'mole', 'proton', 'neutron', 'dalton', 'valency', 'chemical formula'],
     content: 'An atom is the smallest particle of an element that can take part in a chemical reaction. Atoms are extremely small and are measured in atomic mass units (u), where 1 u is defined as exactly 1/12th the mass of one carbon-12 atom. Molecules form when two or more atoms bond together. The Law of Conservation of Mass states that mass can neither be created nor destroyed in a chemical reaction. The Law of Constant Proportions states that in a chemical substance, elements are always present in definite proportions by mass (e.g., in water H2O, hydrogen and oxygen ratio by mass is always 1:8).',
+    simpleExplanation: 'In simple words: atoms are the tiny building blocks everything is made of, and when they join together they form molecules — like Lego bricks joining to build a toy.',
+    example: 'Water (H2O) is a molecule made of 2 hydrogen atoms + 1 oxygen atom joined together. No matter how much water you have, that 2:1 ratio never changes — that\'s the Law of Constant Proportions in action.',
     keyFormulas: ['1 u = 1/12 × mass of C-12 atom', 'Number of moles (n) = Given mass (m) / Molar mass (M) = Number of particles (N) / Avogadro Number (N₀)', 'N₀ = 6.022 × 10²³ particles/mol'],
     summaryPoints: ['Atoms of same element have identical chemical properties.', 'Valency is the combining capacity of an atom.', 'Polyatomic ions act as single units in formula writing.']
   },
@@ -110,6 +152,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '8.5 Equations of Uniformly Accelerated Motion',
     keywords: ['motion', 'velocity', 'speed', 'acceleration', 'distance', 'displacement', 'uniform motion', 'graph'],
     content: 'Motion is the change in position of an object with respect to time. Distance is the total path length traveled (scalar), while displacement is the shortest distance between initial and final points (vector). Speed = Distance / Time. Velocity = Displacement / Time. Acceleration (a) is the rate of change of velocity: a = (v - u) / t. For uniformly accelerated straight-line motion, three foundational equations connect initial velocity (u), final velocity (v), acceleration (a), time (t), and displacement (s): 1) v = u + at, 2) s = ut + 0.5·a·t², 3) v² = u² + 2as.',
+    simpleExplanation: 'In simple words: these three equations just connect how fast something starts, how fast it ends, how quickly its speed changes, how long it moves, and how far it travels — so if you know any 3 of these, you can find the other 2.',
+    example: 'A bike starts from rest (u = 0) and speeds up to 10 m/s in 5 seconds. Using v = u + at: 10 = 0 + a(5), so a = 2 m/s². The bike gains 2 m/s of speed every second.',
     keyFormulas: ['v = u + at', 's = ut + (1/2)at²', 'v² = u² + 2as', 'Average velocity = (u + v) / 2'],
     summaryPoints: ['Slope of distance-time graph gives speed.', 'Slope of velocity-time graph gives acceleration.', 'Area under velocity-time graph gives displacement.']
   },
@@ -123,6 +167,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '5.2 Cell Structure & Organelles',
     keywords: ['cell', 'membrane', 'nucleus', 'mitochondria', 'plastids', 'osmosis', 'prokaryotic', 'eukaryotic', 'ribosome', 'golgi apparatus'],
     content: 'The cell is the basic structural and functional unit of life, discovered by Robert Hooke in 1665. The plasma membrane is selectively permeable and regulates transport via diffusion and osmosis. Plant cells have an outer rigid cellulose cell wall, large central vacuoles, and chloroplasts for photosynthesis. Animal cells lack cell walls and chloroplasts. The nucleus contains chromosomes made of DNA and proteins. Mitochondria are the powerhouse of the cell generating ATP through cellular respiration.',
+    simpleExplanation: 'In simple words: a cell is like a tiny factory — it has different departments (organelles) each doing a specific job to keep the cell (and you) alive.',
+    example: 'Mitochondria are like the factory\'s power plant — they burn \'fuel\' (glucose) to make energy (ATP), which is why they\'re nicknamed the powerhouse of the cell.',
     keyFormulas: ['ATP = Adenosine Triphosphate (Energy currency)', 'Osmosis = Movement of water from high water potential to low water potential through semi-permeable membrane'],
     summaryPoints: ['Prokaryotes lack a membrane-bound nucleus and organelles.', 'Lysosomes are suicide bags containing digestive enzymes.', 'Endoplasmic reticulum synthesizes lipids (SER) and proteins (RER).']
   },
@@ -136,6 +182,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '1.3 Real Numbers and Decimal Expansions',
     keywords: ['rational', 'irrational', 'real number', 'decimal expansion', 'terminating', 'non-terminating', 'number line', 'surds', 'rationalisation'],
     content: 'A rational number can be expressed as p/q where p and q are integers and q ≠ 0. Its decimal expansion is either terminating (e.g., 0.75 = 3/4) or non-terminating repeating (e.g., 0.333... = 1/3). An irrational number cannot be written as p/q; its decimal expansion is non-terminating and non-repeating (e.g., √2, √3, π). Real numbers comprise all rationals and irrationals. To rationalise a binomial denominator like 1/(a + √b), multiply numerator and denominator by the conjugate (a - √b).',
+    simpleExplanation: 'In simple words: rational numbers are numbers you can write as a clean fraction (like 3/4), while irrational numbers go on forever without repeating (like √2) and can never be written as an exact fraction.',
+    example: '1/3 = 0.333... (repeats forever in a pattern) is rational. But √2 = 1.41421356... (never repeats, never ends) is irrational — you literally cannot write it as p/q.',
     keyFormulas: ['p/q form where q ≠ 0', '(a + √b)(a - √b) = a² - b', 'aᵐ × aⁿ = aᵐ⁺ⁿ', '(aᵐ)ⁿ = aᵐⁿ'],
     summaryPoints: ['Sum or product of a non-zero rational and an irrational is always irrational.', 'Every real number corresponds to a unique point on the number line.']
   },
@@ -149,6 +197,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '2.4 Factorisation of Polynomials & Remainder Theorem',
     keywords: ['polynomial', 'degree', 'zeroes', 'factor theorem', 'remainder theorem', 'algebraic identities', 'splitting middle term'],
     content: 'A polynomial p(x) in one variable x is an algebraic expression with whole number exponents. Degree is the highest power of x. Linear polynomial (degree 1), quadratic (degree 2), cubic (degree 3). Remainder Theorem: When p(x) is divided by (x - a), the remainder is p(a). Factor Theorem: (x - a) is a factor of p(x) if and only if p(a) = 0. Quadratic polynomials ax² + bx + c are factorised by splitting the middle term into two numbers whose sum is b and product is a·c.',
+    simpleExplanation: 'In simple words: a polynomial is just an expression with x\'s raised to whole-number powers (like x² + 3x + 2), and finding its \'zeroes\' means finding which x-values make the whole thing equal 0.',
+    example: 'For x² - 5x + 6, if you plug in x = 2: (2)² - 5(2) + 6 = 4 - 10 + 6 = 0. So x = 2 is a zero of this polynomial — it\'s one of its roots.',
     keyFormulas: ['(x + y)² = x² + 2xy + y²', '(x - y)² = x² - 2xy + y²', 'x² - y² = (x - y)(x + y)', '(x + a)(x + b) = x² + (a + b)x + ab', '(x + y + z)² = x² + y² + z² + 2xy + 2yz + 2zx'],
     summaryPoints: ['A polynomial of degree n has at most n zeroes.', 'p(a) = 0 means a is a root or zero of the polynomial.']
   },
@@ -162,6 +212,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '2.2 Features of Democracy',
     keywords: ['democracy', 'elections', 'universal adult franchise', 'rule of law', 'constitution', 'fundamental rights', 'citizens'],
     content: 'Democracy is a form of government in which rulers are elected by the people. Key features include: 1) Major decisions are made by elected leaders; 2) Elections offer a free, fair, and regular choice to change current rulers; 3) Universal adult franchise where each adult citizen has one vote and each vote has one value; 4) The government rules within limits set by constitutional law and citizens rights. Democracy improves decision quality and provides methods to resolve conflicts peacefully.',
+    simpleExplanation: 'In simple words: democracy means the people choose their own leaders through free and fair elections, and everyone\'s vote counts equally — whether you\'re rich or poor, powerful or not.',
+    example: 'In India, a billionaire businessman and a daily-wage farmer each get exactly ONE vote in an election — that\'s what \'one person, one vote, one value\' means in practice.',
     keyFormulas: ['One person, one vote, one value', 'Article 326 of Indian Constitution grants Universal Adult Suffrage'],
     summaryPoints: ['Democracy is better than other forms because it allows correcting mistakes.', 'It enhances the dignity of citizens.']
   },
@@ -177,6 +229,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '10.2 Spherical Mirrors, Lens Formula & Refractive Index',
     keywords: ['light', 'reflection', 'refraction', 'concave mirror', 'convex mirror', 'concave lens', 'convex lens', 'focal length', 'snell law', 'power of lens', 'magnification'],
     content: 'Curved mirrors follow laws of reflection: angle of incidence equals angle of reflection. A concave mirror converges parallel rays to a real focus (used in solar furnaces, shaving mirrors, car headlights). A convex mirror diverges rays, creating an erect, diminished virtual image with a wide field of view (used in rear-view mirrors). Mirror Formula: 1/f = 1/v + 1/u. Refraction is the bending of light across medium boundaries according to Snell\'s law: sin(i) / sin(r) = n₂ / n₁. Lens Formula: 1/f = 1/v - 1/u. Power of lens P = 1/f (in meters), measured in Dioptres (D).',
+    simpleExplanation: 'In simple words: mirrors and lenses bend or bounce light in predictable ways — curved (concave) surfaces focus light to a point, while outward-curved (convex) surfaces spread light out.',
+    example: 'Your car\'s side mirror is convex (curves outward) — that\'s why it shows a wider view of the road behind you, even though objects look a bit smaller and farther than they really are (\'Objects in mirror are closer than they appear!\').',
     keyFormulas: ['Mirror formula: 1/f = 1/v + 1/u', 'Lens formula: 1/f = 1/v - 1/u', 'Magnification m = -v/u (mirror) = +v/u (lens) = h\'/h', 'Power P = 1 / f(in meters) [Unit: Dioptre D]', 'Snell\'s Law: n = sin(i) / sin(r) = c / v'],
     summaryPoints: ['Concave mirror produces both real/inverted and virtual/erect images depending on object position.', 'Convex lens is converging; concave lens is diverging.', 'Sign convention: distances in direction of incident ray are positive, opposite are negative.']
   },
@@ -190,6 +244,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '1.2 Types of Chemical Reactions',
     keywords: ['chemical reaction', 'combination', 'decomposition', 'displacement', 'double displacement', 'redox', 'oxidation', 'reduction', 'corrosion', 'rancidity'],
     content: 'A chemical reaction involves breaking old bonds and making new ones. Types of reactions: 1) Combination: Two or more reactants form one product (CaO + H2O → Ca(OH)2 + Heat). 2) Decomposition: Single reactant breaks down under heat, light, or electricity (2FeSO4 → Fe2O3 + SO2 + SO3). 3) Displacement: A more reactive metal displaces a less reactive metal from its salt solution (Fe + CuSO4 → FeSO4 + Cu). 4) Double Displacement: Exchange of ions between compounds forming a precipitate (Na2SO4 + BaCl2 → BaSO4↓ + 2NaCl). 5) Redox: Simultaneous oxidation (gain of oxygen / loss of electrons) and reduction (loss of oxygen / gain of electrons).',
+    simpleExplanation: 'In simple words: a chemical reaction is just atoms rearranging themselves into new substances — the 5 types just describe different patterns of how reactants combine, split, or swap partners.',
+    example: 'Rusting of an iron nail is a combination + oxidation reaction: iron + oxygen + water → rust (iron oxide). That\'s why nails left out in the rain rust faster than ones kept dry indoors.',
     keyFormulas: ['Oxidation = Gain of O or Loss of H / e⁻', 'Reduction = Loss of O or Gain of H / e⁻', 'Respiration is an exothermic decomposition process'],
     summaryPoints: ['Balancing chemical equations obeys the Law of Conservation of Mass.', 'Precipitation reactions yield insoluble solid salts.', 'Antioxidants prevent rancidity in fatty foods.']
   },
@@ -203,6 +259,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '12.2 Ohm\'s Law, Resistance in Series and Parallel, Joule\'s Heating',
     keywords: ['electricity', 'current', 'potential difference', 'ohms law', 'resistance', 'resistivity', 'series', 'parallel', 'joule heating', 'electric power', 'kilowatt-hour'],
     content: 'Electric current (I) is the rate of flow of electric charges: I = Q / t (Amperes). Potential difference (V) is the work done per unit charge: V = W / Q (Volts). Ohm\'s Law states that at constant temperature, current through a metallic conductor is directly proportional to potential difference across its ends: V = I·R. Resistance R = ρ·(L / A), where ρ is resistivity. In series: R_total = R1 + R2 + R3. In parallel: 1/R_total = 1/R1 + 1/R2 + 1/R3. Joule\'s Heating Law: H = I²·R·t. Electric Power P = V·I = I²·R = V²/R. 1 kWh = 3.6 × 10⁶ Joules.',
+    simpleExplanation: 'In simple words: electric current is like water flowing through a pipe — voltage is the \'push\' making it flow, resistance is anything that slows it down, and Ohm\'s Law just connects these three.',
+    example: 'If a bulb has resistance 5Ω and you apply 10V across it, using V = IR: 10 = I × 5, so I = 2 Amperes of current flows through the bulb.',
     keyFormulas: ['V = I × R', 'R = ρ × (L / A)', 'Series: R_s = R₁ + R₂ + R₃', 'Parallel: 1/R_p = 1/R₁ + 1/R₂ + 1/R₃', 'Heat H = I²Rt', 'Power P = VI = I²R = V²/R', '1 kWh = 3.6 × 10⁶ J (1 commercial unit)'],
     summaryPoints: ['Ammeter is connected in series; voltmeter in parallel.', 'Parallel circuits maintain uniform potential difference across devices.', 'Fuse wire has low melting point and prevents circuit overload.']
   },
@@ -216,6 +274,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '4.3 Factorisation, Quadratic Formula & Nature of Roots',
     keywords: ['quadratic equation', 'roots', 'factorisation', 'quadratic formula', 'discriminant', 'nature of roots', 'real roots', 'b2-4ac'],
     content: 'A quadratic equation in variable x is of the form ax² + bx + c = 0, where a, b, c are real numbers and a ≠ 0. The solutions are called roots or zeroes. Quadratic Formula (Sridharacharya Formula): x = [-b ± √(b² - 4ac)] / (2a). The discriminant D = b² - 4ac determines the nature of roots: 1) If D > 0, there are two distinct real roots; 2) If D = 0, there are two equal real roots (x = -b / 2a); 3) If D < 0, there are no real roots. Sum of roots α + β = -b/a, product of roots α·β = c/a.',
+    simpleExplanation: 'In simple words: a quadratic equation is any equation with an x² term, and \'solving\' it just means finding the x-values that make the equation true (called the roots).',
+    example: 'For x² - 5x + 6 = 0: using the quadratic formula, x = [5 ± √(25-24)]/2 = [5 ± 1]/2, giving x = 3 or x = 2. Check: 3×2 = 6 ✓ and 3+2 = 5 ✓.',
     keyFormulas: ['x = [-b ± √(b² - 4ac)] / (2a)', 'Discriminant D = b² - 4ac', 'D > 0: 2 distinct real roots', 'D = 0: 2 equal real roots', 'D < 0: No real roots', 'α + β = -b/a, αβ = c/a'],
     summaryPoints: ['Quadratic equations always have at most two roots.', 'Graph of a quadratic function is a parabola.', 'Word problems can be solved by translating given conditions into standard ax² + bx + c = 0.']
   },
@@ -229,6 +289,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '8.4 Trigonometric Identities and Specific Angle Values',
     keywords: ['trigonometry', 'sine', 'cosine', 'tangent', 'cosec', 'secant', 'cotangent', 'identities', 'sin2+cos2=1', 'heights and distances', 'right triangle'],
     content: 'Trigonometric ratios relate the acute angles of a right triangle to its side lengths. For angle θ: sin θ = Opposite / Hypotenuse, cos θ = Adjacent / Hypotenuse, tan θ = Opposite / Adjacent = sin θ / cos θ, cosec θ = 1 / sin θ, sec θ = 1 / cos θ, cot θ = 1 / tan θ. Specific values: sin 0°=0, sin 30°=1/2, sin 45°=1/√2, sin 60°=√3/2, sin 90°=1; cos is reversed. Core identities: 1) sin² θ + cos² θ = 1, 2) 1 + tan² θ = sec² θ, 3) 1 + cot² θ = cosec² θ.',
+    simpleExplanation: 'In simple words: trigonometry is just about the relationship between the angles and sides of a right-angled triangle — sin, cos, and tan are simply ratios (fractions) comparing two of the three sides.',
+    example: 'In a right triangle where the opposite side is 3 and the hypotenuse is 5: sin θ = 3/5 = 0.6. This tells you the angle θ without even measuring it with a protractor!',
     keyFormulas: ['sin² θ + cos² θ = 1', 'sec² θ - tan² θ = 1', 'cosec² θ - cot² θ = 1', 'tan θ = sin θ / cos θ', 'sin(90° - θ) = cos θ, cos(90° - θ) = sin θ'],
     summaryPoints: ['Values of sin θ and cos θ never exceed 1.', 'Trigonometric identities hold true for all angle values 0° ≤ θ ≤ 90°.']
   },
@@ -242,6 +304,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '6.2 Basic Proportionality Theorem (Thales Theorem) & Similarity Criteria',
     keywords: ['triangles', 'similarity', 'congruence', 'BPT', 'thales theorem', 'AAA', 'SSS', 'SAS', 'pythagoras theorem', 'ratio of areas'],
     content: 'Two polygons are similar if their corresponding angles are equal and corresponding sides are in the same ratio. Basic Proportionality Theorem (BPT / Thales Theorem): If a line is drawn parallel to one side of a triangle to intersect the other two sides in distinct points, the other two sides are divided in the same ratio (AD/DB = AE/EC). Criteria for similarity of triangles: AAA (or AA), SSS, and SAS similarity. Ratio of areas of two similar triangles is equal to the square of the ratio of their corresponding sides.',
+    simpleExplanation: 'In simple words: if you draw a line parallel to one side of a triangle, it cuts the other two sides in the exact same ratio — that\'s the whole idea behind the Basic Proportionality Theorem.',
+    example: 'If a line parallel to BC cuts AB at D and AC at E, and AD = 2, DB = 4, then AE/EC must also equal 2/4 = 1/2. So if AC = 9, then AE = 3 and EC = 6.',
     keyFormulas: ['BPT: AD/DB = AE/EC when DE || BC', 'Area(ΔABC)/Area(ΔPQR) = (AB/PQ)² = (BC/QR)² = (AC/PR)²', 'Pythagoras: AC² = AB² + BC² in right ΔABC with ∠B = 90°'],
     summaryPoints: ['All congruent figures are similar, but similar figures need not be congruent.', 'AA similarity requires only two pairs of corresponding angles to be equal.']
   },
@@ -257,6 +321,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '2.4 Uniform Acceleration & Graphical Representation',
     keywords: ['motion', 'velocity', 'acceleration', 'equations of motion', 'displacement', 'scalar', 'vector', 'speedometer'],
     content: 'Motion is relative to the observer and frame of reference. Speed is rate of distance covered, velocity is displacement per unit time. When an object accelerates at a uniform rate (a), its motion is described by the equations: v = u + at, s = ut + 0.5·a·t², and v² - u² = 2as. The slope of a position-time graph gives velocity, while the area under a velocity-time graph gives the total displacement traversed during time interval t.',
+    simpleExplanation: 'In simple words: motion just describes how position changes over time — speed tells you how fast, and acceleration tells you how quickly that speed itself is changing.',
+    example: 'A scooter speeds up uniformly from 5 m/s to 15 m/s in 4 seconds. Its acceleration a = (v-u)/t = (15-5)/4 = 2.5 m/s² — meaning its speed increases by 2.5 m/s every second.',
     keyFormulas: ['v = u + at', 's = ut + (1/2)at²', 'v² = u² + 2as', 'a = (v - u) / t'],
     summaryPoints: ['Zero acceleration means uniform velocity.', 'Deceleration/retardation is negative acceleration.']
   },
@@ -270,6 +336,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '1.3 States of Matter & Phase Change',
     keywords: ['matter', 'solid', 'liquid', 'gas', 'evaporation', 'latent heat', 'diffusion', 'temperature', 'pressure'],
     content: 'Matter is made up of tiny particles having mass and volume. Particles possess kinetic energy which increases with temperature. Solid particles vibrate in fixed lattice points; liquid particles slide past one another; gas particles move randomly at high speeds with negligible intermolecular attraction. Latent heat of fusion is energy required to convert 1 kg solid to liquid at melting point without temperature rise. Latent heat of vaporization is energy required to convert 1 kg liquid to gas at boiling point. Evaporation causes cooling because high-energy particles escape the surface.',
+    simpleExplanation: 'In simple words: everything around you is made of tiny moving particles — in solids they\'re packed tight and just vibrate, in liquids they slide around each other, and in gases they fly around freely.',
+    example: 'When you boil water, you\'re giving its particles enough energy to break free from each other and become steam (gas) — that\'s why the water \'disappears\' as vapor into the air.',
     keyFormulas: ['Kelvin (K) = Celsius (°C) + 273.15', 'Density = Mass / Volume (kg/m³)'],
     summaryPoints: ['Sublimation is direct transition from solid to gas (e.g., Camphor, Dry Ice).', 'Humidity, temperature, surface area, and wind speed affect evaporation rate.']
   },
@@ -283,6 +351,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '1.2 Organelles & Cell Division',
     keywords: ['cell', 'nucleus', 'mitochondria', 'chloroplast', 'mitosis', 'meiosis', 'vacuole', 'cell wall', 'cytoplasm'],
     content: 'Every organism begins life as a single cell. Cells contain specialized organelles suspended in cytosol. Mitochondria carry out Krebs cycle and oxidative phosphorylation to generate ATP. Chloroplasts contain chlorophyll thylakoids where sunlight is captured during light-dependent photosynthesis reactions. Plant cells are protected by rigid cellulose cell walls. Somatic cell division occurs via mitosis yielding 2 identical diploid (2n) daughter cells. Gamete formation occurs via meiosis yielding 4 genetically varied haploid (n) cells.',
+    simpleExplanation: 'In simple words: a cell is the basic living unit, and it divides in two different ways — mitosis makes identical copies (like for growth and repair), while meiosis makes different, mixed cells (used for reproduction).',
+    example: 'When you get a cut, your skin cells divide by mitosis to make new identical skin cells and heal the wound. But when you produce eggs or sperm, that\'s meiosis — creating genetically unique cells.',
     keyFormulas: ['Photosynthesis: 6CO2 + 12H2O + Sunlight → C6H12O6 + 6O2 + 6H2O', 'Mitosis: 1 mother cell (2n) → 2 daughter cells (2n)', 'Meiosis: 1 mother cell (2n) → 4 daughter cells (n)'],
     summaryPoints: ['Cell membrane exhibits fluid mosaic model.', 'Ribosomes are protein factories without membrane boundaries.']
   },
@@ -296,6 +366,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '3.3 Zeroes and Factorisation of Algebraic Expressions',
     keywords: ['polynomial', 'zero of polynomial', 'coefficient', 'degree', 'synthetic division', 'remainder theorem'],
     content: 'A polynomial is an algebraic expression P(x) = aₙxⁿ + aₙ₋₁xⁿ⁻¹ + ... + a₁x + a₀ where exponents are non-negative integers. The value k is a zero of P(x) if P(k) = 0. A linear polynomial has 1 zero, quadratic has up to 2 zeroes, cubic has up to 3 zeroes. Factor Theorem states that (x - a) divides P(x) completely without remainder if P(a) = 0. Algebraic identities help simplify products and factorise polynomials quickly.',
+    simpleExplanation: 'In simple words: a polynomial\'s \'zero\' is simply the x-value that makes the whole expression equal zero — and the Factor Theorem is just a shortcut to check if (x - a) divides evenly into it.',
+    example: 'For P(x) = x² - 4, check if x = 2 is a zero: P(2) = (2)² - 4 = 0. Yes! So (x - 2) is a factor, meaning P(x) = (x-2)(x+2).',
     keyFormulas: ['(a + b)³ = a³ + 3a²b + 3ab² + b³ = a³ + b³ + 3ab(a + b)', '(a - b)³ = a³ - 3a²b + 3ab² - b³ = a³ - b³ - 3ab(a - b)', 'a³ + b³ + c³ - 3abc = (a + b + c)(a² + b² + c² - ab - bc - ca)'],
     summaryPoints: ['If a + b + c = 0, then a³ + b³ + c³ = 3abc.', 'Zero polynomial has undefined degree.']
   },
@@ -311,6 +383,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '1.2 Types of Reactions, Oxidation & Reduction',
     keywords: ['chemical reactions', 'equations', 'combination', 'decomposition', 'displacement', 'double displacement', 'redox', 'corrosion', 'rancidity'],
     content: 'Chemical reactions are representations of chemical changes. A balanced equation reflects the Law of Conservation of Mass. Reactions are classified into: Combination (A + B → AB), Decomposition (AB → A + B), Displacement (A + BC → AC + B), and Double Displacement (AB + CD → AD + CB). Oxidation is gain of oxygen or loss of electrons; reduction is loss of oxygen or gain of electrons. Corrosion of iron (rusting) produces hydrated iron(III) oxide Fe2O3·xH2O when exposed to air and moisture.',
+    simpleExplanation: 'In simple words: in a chemical reaction, atoms just rearrange into new substances — nothing is created or destroyed, only recombined, and rusting is a slow everyday example of oxidation.',
+    example: 'An iron gate left out in the rain slowly rusts (Fe + O2 + H2O → rust) — this is why painting iron gates helps, because the paint layer keeps oxygen and water away from the metal.',
     keyFormulas: ['2Mg + O2 → 2MgO (Combination)', 'CaCO3 + Heat → CaO + CO2 (Thermal decomposition)', 'Zn + H2SO4 → ZnSO4 + H2↑ (Displacement)'],
     summaryPoints: ['Rusting requires both oxygen and water.', 'Galvanization coats iron with zinc to prevent oxidation.']
   },
@@ -324,6 +398,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '4.2 Lens Maker Formula, Focal Length & Ray Diagrams',
     keywords: ['refraction', 'lenses', 'focal length', 'lens maker formula', 'magnification', 'convex lens', 'concave lens', 'optical centre', 'critical angle', 'total internal reflection'],
     content: 'When light passes between optically different media, it bends according to Snell\'s law. Refractive index n = c / v = sin(i) / sin(r). For lenses, the Lens Maker\'s formula connects refractive index (n) of lens material with radii of curvature (R1, R2): 1/f = (n - 1)·[1/R1 - 1/R2]. Lens formula is 1/f = 1/v - 1/u with sign convention. When light travels from denser to rarer medium at an angle greater than the critical angle, Total Internal Reflection (TIR) occurs (principles behind optical fibres and diamond sparkle).',
+    simpleExplanation: 'In simple words: light bends when it passes from one material into another (like air into glass) — lenses use this bending to focus or spread out light, which is exactly how eyeglasses and camera lenses work.',
+    example: 'A convex lens (thicker in the middle, like a reading-glass lens) bends light rays inward so they meet at a point — that\'s why it can focus sunlight onto a single spot and even start a small fire.',
     keyFormulas: ['Lens Maker: 1/f = (n - 1)(1/R₁ - 1/R₂)', 'Lens Formula: 1/f = 1/v - 1/u', 'Critical Angle: sin(C) = 1 / n', 'Magnification: m = v / u = h\' / h'],
     summaryPoints: ['Convex lens is thicker in middle, converges light.', 'Concave lens is thinner in middle, diverges light.', 'Focal length is positive for convex lens, negative for concave lens.']
   },
@@ -337,6 +413,8 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '8.1 Mendel\'s Principles of Inheritance & Sex Determination',
     keywords: ['heredity', 'genetics', 'mendel', 'dominant', 'recessive', 'monohybrid cross', 'dihybrid cross', 'phenotype', 'genotype', 'dna', 'chromosomes', 'sex determination'],
     content: 'Heredity is the transmission of traits from parents to offspring. Gregor Johann Mendel conducted hybridization experiments on garden pea (Pisum sativum). In a Monohybrid cross (e.g., Tall TT × Dwarf tt), F1 generation is all Tall (Tt). In F2 generation, phenotypic ratio is 3:1 (3 Tall : 1 Dwarf) and genotypic ratio is 1:2:1 (1 TT : 2 Tt : 1 tt). Law of Dominance states dominant alleles express over recessive. Law of Segregation states allele pairs separate during gamete formation. In humans, sex is determined chromosomally: females have XX, males have XY. Father\'s sperm (X or Y) decides the biological sex.',
+    simpleExplanation: 'In simple words: heredity is how traits pass from parents to children through genes — some traits are \'dominant\' (show up even with one copy) and some are \'recessive\' (only show up if both copies match).',
+    example: 'If Tall (T) is dominant and short (t) is recessive, a Tt plant looks tall even though it\'s carrying a hidden \'t\'. Cross two Tt plants and on average 3 out of 4 offspring will look tall, 1 will look short.',
     keyFormulas: ['Monohybrid F2 Phenotypic Ratio = 3:1', 'Monohybrid F2 Genotypic Ratio = 1:2:1', 'Dihybrid F2 Phenotypic Ratio = 9:3:3:1', 'Human chromosomes = 23 pairs (22 autosomes + 1 sex chromosome pair)'],
     summaryPoints: ['Phenotype is physical appearance; genotype is genetic makeup.', 'All human eggs carry an X chromosome; sperm carry either X or Y.']
   },
@@ -350,8 +428,343 @@ export const KNOWLEDGE_BASE: KnowledgeChunk[] = [
     section: '11.1 Trigonometric Ratios, Values & Standard Identities',
     keywords: ['trigonometry', 'sine', 'cosine', 'tangent', 'ratios', 'identities', 'right triangle', 'complementary angles', 'secant', 'cosecant', 'cotangent'],
     content: 'Trigonometry is the branch of mathematics dealing with relationships between side lengths and angles of triangles. In right triangle ABC with right angle at B: sin A = opposite/hypotenuse = BC/AC; cos A = adjacent/hypotenuse = AB/AC; tan A = BC/AB. Reciprocals: cosec A = 1/sin A, sec A = 1/cos A, cot A = 1/tan A. Standard Pythagorean identities: 1) sin² A + cos² A = 1; 2) sec² A - tan² A = 1; 3) cosec² A - cot² A = 1. Complementary angles: sin(90° - A) = cos A, tan(90° - A) = cot A.',
+    simpleExplanation: 'In simple words: trigonometric ratios are just fixed comparisons between the sides of a right triangle for a given angle — once you know the angle, these ratios never change, no matter how big or small the triangle is.',
+    example: 'Whether a right triangle is tiny or huge, if one angle is 30°, sin(30°) is always exactly 1/2 — that\'s what makes trigonometric ratios so powerful for solving real-world height and distance problems.',
     keyFormulas: ['sin² θ + cos² θ = 1', 'sec² θ - tan² θ = 1', 'cosec² θ - cot² θ = 1', 'tan θ = sin θ / cos θ', 'cot θ = cos θ / sin θ'],
     summaryPoints: ['Trigonometric ratios are dimensionless numbers.', 'Values of sin θ increase from 0 to 1 as θ increases from 0° to 90°.']
+  },
+
+  // ========================== NCERT CLASS 5 ==========================
+  {
+    id: 'ncert-evs-5-environment',
+    board: 'NCERT',
+    subject: 'Environmental Studies',
+    grade: 'Class 5',
+    textbook: 'NCERT Environmental Studies (Looking Around) — Class 5',
+    chapter: 'Chapter: Our Environment',
+    section: 'Plants, Animals and Our Surroundings',
+    keywords: ['environment', 'plants', 'animals', 'habitat', 'surroundings', 'natural resources', 'water', 'conservation'],
+    content: 'Our environment includes everything around us — living things like plants and animals, and non-living things like air, water, and soil. Different animals live in different habitats suited to them: fish live in water, birds build nests in trees, and camels survive in deserts. Plants need air, water, sunlight, and soil to grow. Natural resources like water and trees must be used carefully and not wasted, because they take a long time to renew.',
+    simpleExplanation: 'In simple words: the environment is everything around us — living and non-living — and every living thing has a home (habitat) suited to its needs.',
+    example: 'A fish cannot survive on land because it breathes through gills that only work in water — just like we cannot breathe underwater without help.',
+    summaryPoints: ['Living things depend on their surroundings for food, air, and shelter.', 'Saving water and trees helps protect the environment for the future.']
+  },
+  {
+    id: 'ncert-math-5-fractions',
+    board: 'NCERT',
+    subject: 'Mathematics',
+    grade: 'Class 5',
+    textbook: 'NCERT Mathematics (Math-Magic) — Class 5',
+    chapter: 'Chapter: Parts and Wholes (Fractions)',
+    section: 'Understanding Fractions',
+    keywords: ['fraction', 'numerator', 'denominator', 'half', 'quarter', 'equal parts', 'parts and wholes'],
+    content: 'A fraction represents equal parts of a whole. It is written as numerator/denominator, where the denominator tells how many equal parts the whole is divided into, and the numerator tells how many of those parts are being considered. For example, if a chocolate bar is divided into 4 equal pieces and you eat 1 piece, you have eaten 1/4 of the bar. Fractions with the same denominator can be added or subtracted by simply adding or subtracting their numerators.',
+    simpleExplanation: 'In simple words: a fraction just tells you how many equal slices of something you have out of the total number of slices.',
+    example: 'If a pizza is cut into 8 equal slices and you eat 3 slices, you have eaten 3/8 of the pizza.',
+    keyFormulas: ['Fraction = Numerator / Denominator', 'Same-denominator addition: a/c + b/c = (a+b)/c'],
+    summaryPoints: ['The denominator can never be zero.', 'A fraction with the same numerator and denominator equals 1 whole.']
+  },
+
+  // ========================== NCERT CLASS 6 ==========================
+  {
+    id: 'ncert-sci-6-food',
+    board: 'NCERT',
+    subject: 'Science',
+    grade: 'Class 6',
+    textbook: 'NCERT Science — Class 6',
+    chapter: 'Chapter: Components of Food',
+    section: 'Nutrients and a Balanced Diet',
+    keywords: ['food', 'nutrients', 'carbohydrates', 'proteins', 'fats', 'vitamins', 'minerals', 'balanced diet', 'deficiency disease'],
+    content: 'Food contains nutrients — carbohydrates and fats give us energy, proteins help in growth and repair of the body, and vitamins and minerals protect us from diseases and keep the body functioning properly. A balanced diet contains all these nutrients, along with roughage and water, in the right amounts. Lack of a particular nutrient over a long time causes a deficiency disease, such as scurvy (lack of Vitamin C) or night blindness (lack of Vitamin A).',
+    simpleExplanation: 'In simple words: food gives our body different things it needs — energy to move, building blocks to grow, and protection to stay healthy — and we need a mix of all of them, not just one.',
+    example: 'Rice and bread give energy (carbohydrates), dal and eggs help the body grow (proteins), and fruits like oranges give Vitamin C to keep gums healthy.',
+    summaryPoints: ['A balanced diet has proteins, carbohydrates, fats, vitamins, minerals, roughage, and water.', 'Deficiency diseases occur when a nutrient is missing from the diet for a long time.']
+  },
+  {
+    id: 'ncert-soc-6-earliesthumans',
+    board: 'NCERT',
+    subject: 'Social Science',
+    grade: 'Class 6',
+    textbook: 'NCERT Our Pasts-I (History) — Class 6',
+    chapter: 'Chapter: What, Where, How and When?',
+    section: 'Sources of History',
+    keywords: ['history', 'sources', 'manuscripts', 'inscriptions', 'archaeology', 'artefacts', 'timeline', 'bce', 'ce'],
+    content: 'Historians learn about the past using different kinds of sources: manuscripts (hand-written books), inscriptions (writing carved on stone or metal), and artefacts found by archaeologists such as pots, tools, and coins. Manuscripts and inscriptions give written information, while archaeological remains often survive even when writing does not. Dates in history are written as BCE (Before Common Era) or CE (Common Era), counted from a fixed reference point.',
+    simpleExplanation: 'In simple words: historians are like detectives — they use old books, carved writings, and objects dug out of the ground as clues to piece together what happened long ago.',
+    example: 'Old coins found during digging can tell historians which king ruled a region and roughly when, even if no written record of that event survives.',
+    summaryPoints: ['Sources of history include manuscripts, inscriptions, and archaeological finds.', 'BCE means years counted backwards before year 1; CE means years counted forward from year 1.']
+  },
+  {
+    id: 'ncert-math-6-numbers',
+    board: 'NCERT',
+    subject: 'Mathematics',
+    grade: 'Class 6',
+    textbook: 'NCERT Mathematics — Class 6',
+    chapter: 'Chapter: Knowing Our Numbers',
+    section: 'Large Numbers, Estimation and Place Value',
+    keywords: ['place value', 'large numbers', 'estimation', 'rounding off', 'indian system', 'international system'],
+    content: 'The place value of a digit depends on its position in a number (ones, tens, hundreds, thousands, and so on). In the Indian numbering system, large numbers are grouped as ones, thousands, lakhs, and crores, while the International system groups them as ones, thousands, millions, and billions. Estimation means finding an approximate value close to the actual value, which is useful for quick calculations, by rounding numbers to the nearest 10, 100, or 1000.',
+    simpleExplanation: 'In simple words: every digit in a number has a "place" that decides how much it is really worth, and estimation is just making a smart, quick guess that is close to the exact answer.',
+    example: 'In the number 4,586, the digit 5 is in the hundreds place, so it stands for 500, not just 5.',
+    keyFormulas: ['1 lakh = 1,00,000', '1 crore = 1,00,00,000', '1 million = 10,00,000'],
+    summaryPoints: ['Place value increases by a factor of 10 for each position moved to the left.', 'Rounding off makes numbers easier to work with while estimating.']
+  },
+
+  // ========================== NCERT CLASS 7 ==========================
+  {
+    id: 'ncert-sci-7-nutrition-plants',
+    board: 'NCERT',
+    subject: 'Science',
+    grade: 'Class 7',
+    textbook: 'NCERT Science — Class 7',
+    chapter: 'Chapter: Nutrition in Plants',
+    section: 'Photosynthesis and Modes of Nutrition',
+    keywords: ['photosynthesis', 'chlorophyll', 'autotroph', 'heterotroph', 'saprotroph', 'parasite', 'nutrition in plants', 'stomata'],
+    content: 'Green plants make their own food through photosynthesis, using carbon dioxide, water, and sunlight, with the help of chlorophyll present in leaves. Plants that make their own food are called autotrophs; organisms that depend on others for food are called heterotrophs. Some plants, like the pitcher plant, trap and digest insects to get nutrients (insectivorous), while some like Cuscuta are parasites that absorb nutrients from a host plant. Fungi are saprotrophs — they get nutrition from dead and decaying matter.',
+    simpleExplanation: 'In simple words: green plants cook their own food using sunlight as the "stove", while other living things must eat food made by someone else.',
+    example: 'A mango tree makes its own food using sunlight (autotroph), but a mushroom growing on a rotting log absorbs nutrients from the dead wood (saprotroph).',
+    keyFormulas: ['Photosynthesis: 6CO2 + 6H2O + Sunlight → C6H12O6 + 6O2'],
+    summaryPoints: ['Chlorophyll gives leaves their green colour and absorbs sunlight for photosynthesis.', 'Stomata are tiny pores on leaves that allow gas exchange.']
+  },
+  {
+    id: 'ncert-soc-7-equality',
+    board: 'NCERT',
+    subject: 'Social Science',
+    grade: 'Class 7',
+    textbook: 'NCERT Social and Political Life-II (Civics) — Class 7',
+    chapter: 'Chapter: Equality in Indian Democracy',
+    section: 'Constitutional Equality and Government Schemes',
+    keywords: ['equality', 'constitution', 'discrimination', 'article 15', 'dignity', 'government schemes', 'reservation'],
+    content: 'The Indian Constitution recognises every person as equal, regardless of caste, religion, gender, or economic background. Article 15 prohibits discrimination on the grounds of religion, race, caste, sex, or place of birth. Despite this legal equality, inequality still exists in society, so the government runs special schemes and provisions like reservation in education and jobs to help disadvantaged groups access equal opportunities.',
+    simpleExplanation: 'In simple words: the Constitution says everyone is equal by law, but since society does not always treat everyone equally in real life, the government takes extra steps to help those who have been left behind.',
+    example: 'A government scholarship for students from economically weaker families is one way the government works to make real-life opportunities more equal, not just equal on paper.',
+    summaryPoints: ['Legal equality means everyone is treated the same by the law.', 'Government schemes aim to reduce real-world inequality, not just legal inequality.']
+  },
+  {
+    id: 'ncert-math-7-fractions-decimals',
+    board: 'NCERT',
+    subject: 'Mathematics',
+    grade: 'Class 7',
+    textbook: 'NCERT Mathematics — Class 7',
+    chapter: 'Chapter: Fractions and Decimals',
+    section: 'Multiplication and Division of Fractions & Decimals',
+    keywords: ['fractions', 'decimals', 'multiplication', 'division', 'reciprocal', 'mixed fraction'],
+    content: 'To multiply two fractions, multiply the numerators together and the denominators together. To divide by a fraction, multiply by its reciprocal (the fraction turned upside down). To multiply decimals, multiply as whole numbers first, then place the decimal point by counting the total number of decimal digits in both numbers. To divide a decimal by a whole number, divide normally and keep the decimal point aligned.',
+    simpleExplanation: 'In simple words: multiplying fractions is straightforward — top times top, bottom times bottom — while dividing by a fraction just means flipping it and multiplying instead.',
+    example: '2/3 ÷ 1/2 = 2/3 × 2/1 = 4/3, because dividing by 1/2 is the same as multiplying by its reciprocal 2/1.',
+    keyFormulas: ['a/b × c/d = (a×c)/(b×d)', 'a/b ÷ c/d = a/b × d/c'],
+    summaryPoints: ['The reciprocal of a fraction is obtained by swapping its numerator and denominator.', 'Any whole number can be written as a fraction with denominator 1.']
+  },
+
+  // ========================== NCERT CLASS 8 ==========================
+  {
+    id: 'ncert-sci-8-crop-production',
+    board: 'NCERT',
+    subject: 'Science',
+    grade: 'Class 8',
+    textbook: 'NCERT Science — Class 8',
+    chapter: 'Chapter: Crop Production and Management',
+    section: 'Agricultural Practices',
+    keywords: ['agriculture', 'crops', 'kharif', 'rabi', 'irrigation', 'fertiliser', 'manure', 'sowing', 'harvesting'],
+    content: 'Crops are broadly classified by season: Kharif crops (like paddy and maize) are sown in the rainy season, while Rabi crops (like wheat and gram) are sown in winter. The main agricultural practices are preparation of soil, sowing, adding manure and fertilisers, irrigation, protecting crops from weeds, and harvesting. Manure is organic (from decomposed plant/animal waste) and improves soil texture, while fertilisers are chemical nutrients that boost plant growth quickly but can harm soil health if overused.',
+    simpleExplanation: 'In simple words: farmers grow different crops in different seasons, and every crop needs the soil prepared, seeds sown, watered, protected from weeds, and finally harvested at the right time.',
+    example: 'Wheat is a Rabi crop grown in winter, so farmers sow it around November and harvest it around March-April, once it has had the cool weather it needs to grow well.',
+    summaryPoints: ['Kharif crops need warm, rainy weather; Rabi crops need cool weather.', 'Overuse of chemical fertilisers can reduce long-term soil fertility.']
+  },
+  {
+    id: 'ncert-soc-8-constitution',
+    board: 'NCERT',
+    subject: 'Social Science',
+    grade: 'Class 8',
+    textbook: 'NCERT Social and Political Life-III (Civics) — Class 8',
+    chapter: 'Chapter: The Indian Constitution',
+    section: 'Why We Need a Constitution',
+    keywords: ['constitution', 'preamble', 'fundamental rights', 'directive principles', 'sovereign', 'republic', 'secular'],
+    content: 'The Indian Constitution was adopted on 26 November 1949 and came into effect on 26 January 1950. It lays down the framework of government, the powers of institutions, and the fundamental rights and duties of citizens. The Preamble describes India as a Sovereign, Socialist, Secular, Democratic Republic. A Constitution is needed to generate trust among citizens, define the powers of government, and protect citizens against misuse of power by fixing limits on what a government can do.',
+    simpleExplanation: 'In simple words: a Constitution is like a rulebook for the country — it decides how the government works and makes sure everyone\'s basic rights are protected.',
+    example: 'Because of the Fundamental Rights in the Constitution, the government cannot simply stop a newspaper from criticising its policies — this protects the citizens\' right to freedom of expression.',
+    summaryPoints: ['The Constitution of India was adopted on 26 November 1949 and enforced from 26 January 1950 (celebrated as Republic Day).', 'The Preamble is often called the soul of the Constitution.']
+  },
+  {
+    id: 'ncert-math-8-rational-numbers',
+    board: 'NCERT',
+    subject: 'Mathematics',
+    grade: 'Class 8',
+    textbook: 'NCERT Mathematics — Class 8',
+    chapter: 'Chapter: Rational Numbers',
+    section: 'Properties and Representation on Number Line',
+    keywords: ['rational numbers', 'closure property', 'commutative', 'associative', 'additive inverse', 'multiplicative inverse'],
+    content: 'A rational number is any number that can be written in the form p/q, where p and q are integers and q ≠ 0. Rational numbers are closed under addition, subtraction, and multiplication (the result is always rational), but not under division by zero. Addition and multiplication of rational numbers are commutative and associative. Every rational number has an additive inverse (its negative) and, except zero, a multiplicative inverse (its reciprocal).',
+    simpleExplanation: 'In simple words: rational numbers are all the numbers you can write as a simple fraction, and there are neat rules — like order not mattering in addition — that always work for them.',
+    example: '-3/4 is a rational number. Its additive inverse is 3/4 (since -3/4 + 3/4 = 0), and its multiplicative inverse is -4/3 (since -3/4 × -4/3 = 1).',
+    keyFormulas: ['Additive inverse of a/b is -a/b', 'Multiplicative inverse of a/b is b/a (a ≠ 0)'],
+    summaryPoints: ['Zero has no multiplicative inverse.', 'Between any two rational numbers, there are infinitely many other rational numbers.']
+  },
+
+  // ========================== TSCERT CLASS 5 ==========================
+  {
+    id: 'tscert-evs-5-surroundings',
+    board: 'TSCERT',
+    subject: 'Environmental Science',
+    grade: 'Class 5',
+    textbook: 'TSCERT Environmental Science — Class 5',
+    chapter: 'Chapter: Our Surroundings',
+    section: 'Living and Non-Living Things',
+    keywords: ['living things', 'non-living things', 'surroundings', 'growth', 'reproduction', 'respiration'],
+    content: 'Living things grow, move on their own, reproduce, breathe, and respond to their surroundings — examples include humans, animals, and plants. Non-living things do not show these characteristics — examples include stones, water, and chairs. Observing our surroundings carefully helps us classify things around us as living or non-living based on these features.',
+    simpleExplanation: 'In simple words: living things grow and can make more of themselves and react to the world, while non-living things just stay as they are unless something else moves or changes them.',
+    example: 'A plant grows taller over weeks and makes seeds to create new plants, but a stone lying in the same spot never grows or reproduces on its own.',
+    summaryPoints: ['All living things need food, air, and water to survive.', 'Non-living things can still be useful to living things, like a rock providing shelter for small animals.']
+  },
+  {
+    id: 'tscert-math-5-shapes',
+    board: 'TSCERT',
+    subject: 'Mathematics',
+    grade: 'Class 5',
+    textbook: 'TSCERT Mathematics — Class 5',
+    chapter: 'Chapter: Shapes and Measurements',
+    section: 'Perimeter of Simple Shapes',
+    keywords: ['perimeter', 'shapes', 'square', 'rectangle', 'triangle', 'measurement', 'boundary'],
+    content: 'Perimeter is the total distance around the boundary of a closed shape. For a rectangle, perimeter = 2 × (length + breadth). For a square, since all four sides are equal, perimeter = 4 × side. For any polygon, perimeter is simply the sum of the lengths of all its sides.',
+    simpleExplanation: 'In simple words: perimeter is just how far you would walk if you walked all the way around the edge of a shape.',
+    example: 'A rectangular garden 8 m long and 5 m wide has a perimeter of 2 × (8 + 5) = 26 metres of fencing needed to go all the way around it.',
+    keyFormulas: ['Perimeter of rectangle = 2 × (length + breadth)', 'Perimeter of square = 4 × side'],
+    summaryPoints: ['Perimeter is measured in units of length, like metres or centimetres.', 'Two shapes can have the same perimeter but different areas.']
+  },
+
+  // ========================== TSCERT CLASS 6 ==========================
+  {
+    id: 'tscert-gs-6-measurement',
+    board: 'TSCERT',
+    subject: 'General Science',
+    grade: 'Class 6',
+    textbook: 'TSCERT General Science — Class 6',
+    chapter: 'Chapter: Measurements',
+    section: 'Units and Methods of Measurement',
+    keywords: ['measurement', 'si units', 'length', 'mass', 'volume', 'metre', 'kilogram', 'litre'],
+    content: 'Measurement means comparing an unknown quantity with a known fixed quantity (a unit). The standard international system (SI) units are metre (length), kilogram (mass), and second (time). A metre scale is used to measure length, a beam balance is used to measure mass, and a measuring cylinder is used to measure the volume of liquids. Correct measurement requires the measuring instrument to be placed correctly and read at eye level to avoid errors.',
+    simpleExplanation: 'In simple words: measuring just means finding out how much of something there is by comparing it to an agreed, standard unit that everyone uses.',
+    example: 'When a tailor measures cloth with a metre tape, they are comparing the length of the cloth to the standard unit of a metre, so the measurement means the same thing anywhere in the world.',
+    keyFormulas: ['1 metre = 100 centimetres', '1 kilogram = 1000 grams', '1 litre = 1000 millilitres'],
+    summaryPoints: ['Using standard units allows measurements to be compared accurately anywhere.', 'Reading a scale at an angle instead of eye level causes measurement errors (parallax error).']
+  },
+  {
+    id: 'tscert-social-6-earth',
+    board: 'TSCERT',
+    subject: 'Social Studies',
+    grade: 'Class 6',
+    textbook: 'TSCERT Social Studies — Class 6',
+    chapter: 'Chapter: The Earth in the Solar System',
+    section: 'Planets, Rotation and Revolution',
+    keywords: ['solar system', 'planets', 'rotation', 'revolution', 'earth', 'sun', 'orbit', 'day and night'],
+    content: 'The Solar System consists of the Sun and the celestial bodies that orbit it, including eight planets. Earth is the third planet from the Sun. Earth spins on its own axis, called rotation, which causes day and night, and takes about 24 hours to complete one rotation. Earth also moves around the Sun in a path called an orbit, called revolution, taking about 365¼ days to complete — this causes the changing seasons.',
+    simpleExplanation: 'In simple words: the Earth spins like a top (giving us day and night) and also travels in a big circle around the Sun (giving us the different seasons) at the same time.',
+    example: 'When it is daytime in India, it is nighttime on the opposite side of the Earth, because only the side facing the Sun receives sunlight at any moment.',
+    summaryPoints: ['Rotation of Earth on its axis takes about 24 hours and causes day and night.', 'Revolution of Earth around the Sun takes about 365¼ days and causes the seasons.']
+  },
+  {
+    id: 'tscert-math-6-integers',
+    board: 'TSCERT',
+    subject: 'Mathematics',
+    grade: 'Class 6',
+    textbook: 'TSCERT Mathematics — Class 6',
+    chapter: 'Chapter: Integers',
+    section: 'Introduction to Positive and Negative Numbers',
+    keywords: ['integers', 'positive numbers', 'negative numbers', 'number line', 'absolute value'],
+    content: 'Integers include all positive whole numbers, negative whole numbers, and zero. On a number line, positive integers lie to the right of zero and negative integers lie to the left. When adding integers with the same sign, add their values and keep the sign; when adding integers with different signs, subtract the smaller absolute value from the larger and take the sign of the larger.',
+    simpleExplanation: 'In simple words: integers are just whole numbers that can also go below zero — think of a thermometer that can show temperatures both above and below zero.',
+    example: 'If the temperature is -3°C and it rises by 5°C, the new temperature is -3 + 5 = 2°C, shown by moving 5 steps to the right on a number line starting from -3.',
+    summaryPoints: ['Every positive integer is greater than every negative integer.', 'Zero is neither positive nor negative.']
+  },
+
+  // ========================== TSCERT CLASS 7 ==========================
+  {
+    id: 'tscert-gs-7-heat',
+    board: 'TSCERT',
+    subject: 'General Science',
+    grade: 'Class 7',
+    textbook: 'TSCERT General Science — Class 7',
+    chapter: 'Chapter: Heat',
+    section: 'Temperature, Thermometers and Transfer of Heat',
+    keywords: ['heat', 'temperature', 'thermometer', 'conduction', 'convection', 'radiation', 'celsius'],
+    content: 'Heat is a form of energy that flows from a hotter object to a colder object. Temperature is a measure of how hot or cold an object is, usually measured in degrees Celsius using a thermometer. Heat travels by three methods: conduction (through solids, particle to particle), convection (through liquids and gases, by movement of the heated particles themselves), and radiation (through empty space, without needing any medium, like heat from the Sun).',
+    simpleExplanation: 'In simple words: heat always moves from something hot to something cooler, and it can travel in three different ways depending on the material it moves through.',
+    example: 'A metal spoon left in hot tea becomes warm because heat travels up the spoon by conduction, from particle to particle.',
+    summaryPoints: ['Heat flows from a region of higher temperature to lower temperature until both are equal.', 'Radiation is the only method of heat transfer that does not need a physical medium.']
+  },
+  {
+    id: 'tscert-social-7-employment',
+    board: 'TSCERT',
+    subject: 'Social Studies',
+    grade: 'Class 7',
+    textbook: 'TSCERT Social Studies — Class 7',
+    chapter: 'Chapter: Production and Employment',
+    section: 'Sectors of the Economy',
+    keywords: ['production', 'employment', 'primary sector', 'secondary sector', 'tertiary sector', 'economy'],
+    content: 'Economic activities are grouped into three sectors: the Primary sector (agriculture, fishing, mining — activities directly using natural resources), the Secondary sector (manufacturing and industry — converting raw materials into finished goods), and the Tertiary sector (services like teaching, transport, and banking). Employment in these sectors differs across rural and urban areas, with the Primary sector employing the largest share of workers in rural India.',
+    simpleExplanation: 'In simple words: the economy\'s work is divided into three types — growing/collecting raw materials, making things from those materials, and providing services to people.',
+    example: 'A farmer growing cotton works in the Primary sector, a factory worker turning that cotton into cloth works in the Secondary sector, and the shopkeeper selling the finished shirt works in the Tertiary sector.',
+    summaryPoints: ['The Primary sector directly depends on natural resources.', 'The Tertiary sector provides support services rather than producing goods.']
+  },
+  {
+    id: 'tscert-math-7-simple-equations',
+    board: 'TSCERT',
+    subject: 'Mathematics',
+    grade: 'Class 7',
+    textbook: 'TSCERT Mathematics — Class 7',
+    chapter: 'Chapter: Simple Equations',
+    section: 'Solving Linear Equations in One Variable',
+    keywords: ['simple equations', 'variable', 'linear equation', 'solving equations', 'transposition'],
+    content: 'A simple equation contains a variable whose value makes the equation true. To solve an equation, the same operation (adding, subtracting, multiplying, or dividing) must be performed on both sides to keep it balanced, or terms can be transposed (moved to the other side by reversing the sign). The solution is checked by substituting the value back into the original equation.',
+    simpleExplanation: 'In simple words: solving an equation means finding the mystery number that makes both sides of the equal sign truly equal.',
+    example: 'To solve x + 5 = 12, subtract 5 from both sides: x = 12 - 5 = 7. Checking: 7 + 5 = 12, which is correct.',
+    keyFormulas: ['If a term moves across the equal sign, its operation reverses (transposition)'],
+    summaryPoints: ['Whatever operation is done to one side of an equation must be done to the other side too.', 'Always verify a solution by substituting it back into the original equation.']
+  },
+
+  // ========================== TSCERT CLASS 8 ==========================
+  {
+    id: 'tscert-gs-8-force-pressure',
+    board: 'TSCERT',
+    subject: 'General Science',
+    grade: 'Class 8',
+    textbook: 'TSCERT General Science — Class 8',
+    chapter: 'Chapter: Force and Pressure',
+    section: 'Types of Force and Pressure in Fluids',
+    keywords: ['force', 'pressure', 'contact force', 'non-contact force', 'friction', 'muscular force', 'gravitational force'],
+    content: 'A force can change the shape, speed, or direction of motion of an object. Forces are of two types: contact forces (like muscular force and friction, which need physical touch) and non-contact forces (like gravitational, magnetic, and electrostatic force, which act at a distance). Pressure is the force acting per unit area: Pressure = Force / Area. The same force spread over a smaller area creates greater pressure.',
+    simpleExplanation: 'In simple words: a force is simply a push or a pull, and pressure just tells you how concentrated that push is over a given area.',
+    example: 'A sharp knife cuts vegetables easily because its thin edge concentrates the force over a very small area, creating high pressure, unlike a blunt knife with a wider edge.',
+    keyFormulas: ['Pressure = Force / Area'],
+    summaryPoints: ['Friction is a contact force that opposes relative motion between two surfaces.', 'For the same force, smaller area means greater pressure.']
+  },
+  {
+    id: 'tscert-social-8-nationalism',
+    board: 'TSCERT',
+    subject: 'Social Studies',
+    grade: 'Class 8',
+    textbook: 'TSCERT Social Studies — Class 8',
+    chapter: 'Chapter: Nationalism in India',
+    section: 'Growth of the National Movement',
+    keywords: ['nationalism', 'freedom struggle', 'indian national congress', 'non-cooperation movement', 'gandhi', 'colonialism'],
+    content: 'Nationalism in India grew as people began to feel a shared sense of identity and resentment against British colonial rule. The Indian National Congress, formed in 1885, became the main platform for the freedom movement. Mahatma Gandhi\'s Non-Cooperation Movement (1920-22) called on Indians to boycott British goods, schools, and institutions using non-violent methods, marking a turn towards mass participation in the freedom struggle.',
+    simpleExplanation: 'In simple words: nationalism grew as more and more Indians started feeling that they belonged to one nation and should be free to govern themselves rather than be ruled by outsiders.',
+    example: 'During the Non-Cooperation Movement, many students left government schools and lawyers gave up their practice to protest peacefully against British rule, showing nationalism in action.',
+    summaryPoints: ['The Indian National Congress was founded in 1885.', 'The Non-Cooperation Movement popularised non-violent mass protest as a freedom-struggle strategy.']
+  },
+  {
+    id: 'tscert-math-8-linear-equations',
+    board: 'TSCERT',
+    subject: 'Mathematics',
+    grade: 'Class 8',
+    textbook: 'TSCERT Mathematics — Class 8',
+    chapter: 'Chapter: Linear Equations in One Variable',
+    section: 'Equations with Variables on Both Sides',
+    keywords: ['linear equation', 'variable', 'transposition', 'one variable', 'solving equations'],
+    content: 'A linear equation in one variable has the highest power of the variable equal to 1. When variables appear on both sides of the equation, collect all variable terms on one side and constant terms on the other by transposing (moving terms across the equal sign and reversing their sign), then simplify to find the value of the variable.',
+    simpleExplanation: 'In simple words: to solve an equation with the unknown on both sides, gather all the unknowns together on one side and all the plain numbers on the other, then simplify.',
+    example: 'To solve 3x - 2 = x + 8: move x to the left and -2 to the right → 3x - x = 8 + 2 → 2x = 10 → x = 5.',
+    summaryPoints: ['A linear equation in one variable has exactly one solution (unless it is always or never true).', 'Always simplify both sides fully before transposing terms.']
   }
 ];
 
@@ -387,9 +800,24 @@ export const FREQUENT_DOUBT_PROMPTS: Record<string, string[]> = {
     'Why is universal adult franchise essential for equality?',
     'Explain the three sectors of Indian economy (Primary, Secondary, Tertiary).',
   ],
-  'English': [
-    'How do I identify active vs passive voice in secondary grammar?',
-    'What is the structure of a formal letter to an editor?',
-    'Explain subject-verb agreement rules with examples.',
-  ]
+  'Social Studies': [
+    'What are the core features that define a true democracy?',
+    'Why is universal adult franchise essential for equality?',
+    'Explain the three sectors of Indian economy (Primary, Secondary, Tertiary).',
+  ],
+  'Environmental Studies': [
+    'Why do we need to save water in our daily life?',
+    'What are the differences between wild and domestic animals?',
+    'Why is it important to keep our surroundings clean?',
+  ],
+  'Environmental Science': [
+    'Why do we need to save water in our daily life?',
+    'What are the differences between wild and domestic animals?',
+    'Why is it important to keep our surroundings clean?',
+  ],
+  'General Science': [
+    'What are the components of a balanced diet?',
+    'Why does a plant need sunlight to prepare food?',
+    'How is a simple electric circuit completed?',
+  ],
 };
