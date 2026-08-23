@@ -1,0 +1,6 @@
+{
+  "name": "DoubtBridge - AI for Equitable Education Access",
+  "description": "Grounded multi-lingual AI tutoring and doubt resolution for Class 9 & 10 students across NCERT and TSCERT curriculums, with adaptive practice and teacher insight analytics.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
