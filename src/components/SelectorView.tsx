@@ -28,8 +28,14 @@ export const SelectorView: React.FC<SelectorViewProps> = ({
 }) => {
   const [activeTabPrompt, setActiveTabPrompt] = useState<string | null>(null);
 
-  // Available subjects filtered by the chosen board (or general)
-  const availableSubjects = SUBJECTS.filter((s) => !selectedBoard || s.board === selectedBoard);
+  // Available subjects filtered by the chosen board. Board selection happens before
+  // grade selection in this flow, so several SUBJECTS entries can share the same name
+  // across different grade bands (e.g. TSCERT has separate Mathematics rows for
+  // Class 5 / 6-8 / 9-10) — dedupe by name here so each subject appears once as a chip.
+  // The actual grade-specific entry is resolved later, once a grade is picked.
+  const availableSubjects = SUBJECTS.filter((s) => !selectedBoard || s.board === selectedBoard).filter(
+    (s, idx, arr) => arr.findIndex((other) => other.name === s.name) === idx
+  );
 
   // Sun completion math
   const litCount = (selectedBoard ? 1 : 0) + (selectedSubject ? 1 : 0) + (selectedGrade ? 1 : 0);
