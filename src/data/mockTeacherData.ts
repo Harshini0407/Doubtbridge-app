@@ -510,6 +510,333 @@ export const INITIAL_PRACTICE_QUESTIONS: PracticeQuestion[] = [
     correctIndex: 0,
     hint: 'Convert 72 km/h to m/s (72 × 5/18 = 20 m/s) and 5 minutes to seconds (300 s). Then use s = ut + 1/2 at² or v² = u² + 2as.',
     explanation: 'u = 0 m/s, v = 72 × (5/18) = 20 m/s, t = 5 × 60 = 300 s.\nAcceleration a = (v - u)/t = (20 - 0)/300 = 1/15 m/s².\nDistance s = ut + ½at² = 0 + ½(1/15)(300)² = ½(1/15)(90000) = 3000 m = 3 km.'
+  },
+
+  // ================= SOCIAL SCIENCE (NCERT) CLASS 9 =================
+  {
+    id: 'q-soc-9-easy-1',
+    subject: 'Social Science',
+    grade: 'Class 9',
+    chapter: 'What is Democracy? Why Democracy?',
+    difficulty: 'Easy',
+    question: 'In a democracy, how are the rulers of a country chosen?',
+    options: ['They are elected by the people', 'They inherit the position from their family', 'They are appointed by the army', 'They are chosen by a single ruling company'],
+    correctIndex: 0,
+    hint: 'Think about what happens during an election.',
+    explanation: 'A democracy is a form of government where rulers are elected by the people through free and fair elections, not inherited or appointed by force.'
+  },
+  {
+    id: 'q-soc-9-med-1',
+    subject: 'Social Science',
+    grade: 'Class 9',
+    chapter: 'What is Democracy? Why Democracy?',
+    difficulty: 'Medium',
+    question: '"Universal Adult Franchise" means that:',
+    options: ['Every adult citizen has one vote of equal value', 'Only educated citizens can vote', 'Only property-owning citizens can vote', 'Voting is compulsory only for government employees'],
+    correctIndex: 0,
+    hint: 'Focus on the word "universal" — who is included?',
+    explanation: 'Universal Adult Franchise means every adult citizen, regardless of wealth, education, caste, or gender, gets exactly one vote, and every vote carries equal value — this is a core feature of democracy protected under Article 326 of the Indian Constitution.'
+  },
+  {
+    id: 'q-soc-9-chal-1',
+    subject: 'Social Science',
+    grade: 'Class 9',
+    chapter: 'What is Democracy? Why Democracy?',
+    difficulty: 'Challenging',
+    question: 'Why is democracy generally considered a better form of government than others, even though decision-making can be slower?',
+    options: [
+      'Because it allows mistakes to be identified and corrected through regular elections and accountability',
+      'Because a single leader can make faster decisions without any checks',
+      'Because it guarantees every decision will always be economically efficient',
+      'Because elections are held only once and never repeated'
+    ],
+    correctIndex: 0,
+    hint: 'Think about what regular elections and accountability allow citizens to do.',
+    explanation: 'Democracy improves the quality of decision-making over time because it allows for public discussion, and importantly, it gives citizens the power to correct mistakes by voting out rulers whose policies fail, and it also enhances citizen dignity and equality — advantages that outweigh the fact that decisions may sometimes take longer than in an authoritarian system.'
+  },
+
+  // ================= SOCIAL SCIENCE (NCERT) CLASS 8 =================
+  {
+    id: 'q-soc-8-easy-1',
+    subject: 'Social Science',
+    grade: 'Class 8',
+    chapter: 'The Indian Constitution',
+    difficulty: 'Easy',
+    question: 'When did the Constitution of India come into effect?',
+    options: ['26 January 1950', '15 August 1947', '26 November 1949', '2 October 1950'],
+    correctIndex: 0,
+    hint: 'This date is celebrated every year as Republic Day.',
+    explanation: 'The Constitution was adopted on 26 November 1949 but came into effect on 26 January 1950, which is celebrated every year as Republic Day.'
+  },
+  {
+    id: 'q-soc-8-med-1',
+    subject: 'Social Science',
+    grade: 'Class 8',
+    chapter: 'The Indian Constitution',
+    difficulty: 'Medium',
+    question: 'The Preamble describes India as a Sovereign, Socialist, Secular, Democratic Republic. What does "Secular" mean in this context?',
+    options: [
+      'The government treats all religions equally and has no official religion',
+      'Only one religion is officially recognised by the state',
+      'Religious practices are banned in the country',
+      'Citizens are required to change their religion at 18 years of age'
+    ],
+    correctIndex: 0,
+    hint: 'Think about how the government relates to different religions.',
+    explanation: 'Secular means the Indian state does not have an official religion and treats all religions equally, allowing citizens the freedom to practise any religion of their choice.'
+  },
+
+  // ================= SOCIAL SCIENCE (NCERT) CLASS 7 =================
+  {
+    id: 'q-soc-7-easy-1',
+    subject: 'Social Science',
+    grade: 'Class 7',
+    chapter: 'Equality in Indian Democracy',
+    difficulty: 'Easy',
+    question: 'Which Article of the Indian Constitution prohibits discrimination on grounds of religion, race, caste, sex, or place of birth?',
+    options: ['Article 15', 'Article 370', 'Article 1', 'Article 500'],
+    correctIndex: 0,
+    hint: 'Recall the specific numbered article discussed in the Equality chapter.',
+    explanation: 'Article 15 of the Indian Constitution prohibits discrimination on the grounds of religion, race, caste, sex, or place of birth, making legal equality a fundamental right.'
+  },
+  {
+    id: 'q-soc-7-med-1',
+    subject: 'Social Science',
+    grade: 'Class 7',
+    chapter: 'Equality in Indian Democracy',
+    difficulty: 'Medium',
+    question: 'Why does the Indian government run special schemes like reservation in education, even though the Constitution guarantees legal equality to everyone?',
+    options: [
+      'Because legal equality alone does not remove real, existing social and economic inequalities',
+      'Because reservation is required by law for every citizen equally',
+      'Because the Constitution does not actually mention equality',
+      'Because special schemes are meant to replace the Constitution'
+    ],
+    correctIndex: 0,
+    hint: 'Think about the gap between what the law says and what happens in society.',
+    explanation: 'Even though the Constitution grants legal equality to all citizens, real social and economic inequality still exists due to history and circumstance, so the government runs schemes such as reservation to help disadvantaged groups get fairer access to real opportunities.'
+  },
+
+  // ================= SOCIAL SCIENCE (NCERT) CLASS 6 =================
+  {
+    id: 'q-soc-6-easy-1',
+    subject: 'Social Science',
+    grade: 'Class 6',
+    chapter: 'What, Where, How and When?',
+    difficulty: 'Easy',
+    question: 'Which of these is an example of an archaeological source used by historians?',
+    options: ['An old pot or coin dug up from the ground', 'A weather forecast for tomorrow', 'A phone call', 'A social media post'],
+    correctIndex: 0,
+    hint: 'Think about objects that survive underground for a very long time.',
+    explanation: 'Archaeological sources are physical remains like pots, tools, and coins found by archaeologists, which give historians clues about life in the past even when no written records survive.'
+  },
+  {
+    id: 'q-soc-6-med-1',
+    subject: 'Social Science',
+    grade: 'Class 6',
+    chapter: 'What, Where, How and When?',
+    difficulty: 'Medium',
+    question: 'What is the difference between BCE and CE when historians write dates?',
+    options: [
+      'BCE counts years backwards before a fixed reference point; CE counts years forward from it',
+      'BCE and CE mean exactly the same thing',
+      'BCE is used only for dates after 2000',
+      'CE means the date is uncertain'
+    ],
+    correctIndex: 0,
+    hint: 'Think about which direction the years count in each system.',
+    explanation: 'BCE (Before Common Era) counts years backward from a fixed reference point, while CE (Common Era) counts years forward from that same point — together they let historians place events on a single timeline.'
+  },
+
+  // ================= SOCIAL STUDIES (TSCERT) CLASS 8 =================
+  {
+    id: 'q-tssoc-8-easy-1',
+    subject: 'Social Studies',
+    grade: 'Class 8',
+    chapter: 'Nationalism in India',
+    difficulty: 'Easy',
+    question: 'In which year was the Indian National Congress founded?',
+    options: ['1885', '1947', '1920', '1857'],
+    correctIndex: 0,
+    hint: 'This organisation became the main platform for India\'s freedom movement.',
+    explanation: 'The Indian National Congress was founded in 1885 and went on to become the main platform for organising India\'s freedom struggle.'
+  },
+  {
+    id: 'q-tssoc-8-med-1',
+    subject: 'Social Studies',
+    grade: 'Class 8',
+    chapter: 'Nationalism in India',
+    difficulty: 'Medium',
+    question: 'What was the main method used during Mahatma Gandhi\'s Non-Cooperation Movement (1920-22)?',
+    options: [
+      'Non-violent boycott of British goods, schools, and institutions',
+      'Armed rebellion against British forces',
+      'Cooperating fully with all British policies',
+      'Boycotting only foreign cricket matches'
+    ],
+    correctIndex: 0,
+    hint: 'Recall Gandhi\'s core principle for protest.',
+    explanation: 'The Non-Cooperation Movement called on Indians to non-violently boycott British goods, schools, courts, and government institutions, marking a shift toward mass, non-violent participation in the freedom struggle.'
+  },
+
+  // ================= SOCIAL STUDIES (TSCERT) CLASS 7 =================
+  {
+    id: 'q-tssoc-7-easy-1',
+    subject: 'Social Studies',
+    grade: 'Class 7',
+    chapter: 'Production and Employment',
+    difficulty: 'Easy',
+    question: 'A farmer growing wheat is working in which sector of the economy?',
+    options: ['Primary sector', 'Secondary sector', 'Tertiary sector', 'None of these'],
+    correctIndex: 0,
+    hint: 'Think about activities that directly use natural resources.',
+    explanation: 'Agriculture directly uses natural resources like land and water, so it belongs to the Primary sector of the economy.'
+  },
+  {
+    id: 'q-tssoc-7-med-1',
+    subject: 'Social Studies',
+    grade: 'Class 7',
+    chapter: 'Production and Employment',
+    difficulty: 'Medium',
+    question: 'A factory that turns raw cotton into cloth belongs to which sector, and a shopkeeper selling that cloth belongs to which sector?',
+    options: [
+      'Factory: Secondary sector; Shopkeeper: Tertiary sector',
+      'Factory: Primary sector; Shopkeeper: Secondary sector',
+      'Factory: Tertiary sector; Shopkeeper: Primary sector',
+      'Both belong to the Primary sector'
+    ],
+    correctIndex: 0,
+    hint: 'One sector manufactures goods; the other provides a service.',
+    explanation: 'The factory converts a raw material (cotton) into a finished good (cloth), which is Secondary sector work; the shopkeeper provides a service (selling), which falls under the Tertiary sector.'
+  },
+
+  // ================= SOCIAL STUDIES (TSCERT) CLASS 6 =================
+  {
+    id: 'q-tssoc-6-easy-1',
+    subject: 'Social Studies',
+    grade: 'Class 6',
+    chapter: 'The Earth in the Solar System',
+    difficulty: 'Easy',
+    question: 'What causes day and night on Earth?',
+    options: ['The rotation of the Earth on its own axis', 'The Earth changing its shape', 'The Sun moving around the Earth every hour', 'The Earth stopping completely at night'],
+    correctIndex: 0,
+    hint: 'Think about which movement takes about 24 hours to complete.',
+    explanation: 'Earth spins on its own axis (rotation), taking about 24 hours for one full spin — the side facing the Sun experiences day, while the opposite side experiences night.'
+  },
+  {
+    id: 'q-tssoc-6-med-1',
+    subject: 'Social Studies',
+    grade: 'Class 6',
+    chapter: 'The Earth in the Solar System',
+    difficulty: 'Medium',
+    question: 'What is the difference between rotation and revolution of the Earth?',
+    options: [
+      'Rotation is Earth spinning on its axis (causing day/night); revolution is Earth orbiting the Sun (causing seasons)',
+      'Rotation and revolution mean exactly the same thing',
+      'Rotation causes seasons; revolution causes day and night',
+      'Only the Moon rotates and revolves, not the Earth'
+    ],
+    correctIndex: 0,
+    hint: 'One movement takes about 24 hours, the other takes about 365 days.',
+    explanation: 'Rotation is Earth spinning on its own axis, completing one turn in about 24 hours and causing day and night. Revolution is Earth\'s journey around the Sun, taking about 365¼ days and causing the changing seasons.'
+  },
+
+  // ================= EVS / GENERAL SCIENCE / MATH — CLASSES 5-8 SAMPLE SET =================
+  {
+    id: 'q-evs-5-easy-1',
+    subject: 'Environmental Studies',
+    grade: 'Class 5',
+    chapter: 'Our Environment',
+    difficulty: 'Easy',
+    question: 'Why can a fish not survive on land for a long time?',
+    options: ['Its gills need water to help it breathe', 'It does not need air to survive', 'It prefers hot, dry weather', 'Fish do not need oxygen at all'],
+    correctIndex: 0,
+    hint: 'Think about the special body part fish use to breathe.',
+    explanation: 'Fish breathe through gills, which can only take in oxygen dissolved in water — out of water, their gills cannot function, so they cannot survive on land for long.'
+  },
+  {
+    id: 'q-gs-6-easy-1',
+    subject: 'General Science',
+    grade: 'Class 6',
+    chapter: 'Measurements',
+    difficulty: 'Easy',
+    question: 'Which instrument is used to measure the volume of a liquid?',
+    options: ['Measuring cylinder', 'Metre scale', 'Beam balance', 'Thermometer'],
+    correctIndex: 0,
+    hint: 'Think about which tool has markings for millilitres.',
+    explanation: 'A measuring cylinder has volume markings (like millilitres) and is the standard instrument used to measure the volume of liquids.'
+  },
+  {
+    id: 'q-sci-6-easy-1',
+    subject: 'Science',
+    grade: 'Class 6',
+    chapter: 'Components of Food',
+    difficulty: 'Easy',
+    question: 'Which nutrient mainly helps in the growth and repair of the body?',
+    options: ['Proteins', 'Carbohydrates', 'Water only', 'None of these'],
+    correctIndex: 0,
+    hint: 'Think of foods like dal, eggs, and milk.',
+    explanation: 'Proteins are the body-building nutrients that help in growth and repair of body tissues, found in foods like dal, eggs, milk, and meat.'
+  },
+  {
+    id: 'q-math-6-easy-1',
+    subject: 'Mathematics',
+    grade: 'Class 6',
+    chapter: 'Knowing Our Numbers',
+    difficulty: 'Easy',
+    question: 'In the number 4,586, what is the place value of the digit 5?',
+    options: ['500', '5', '50', '5000'],
+    correctIndex: 0,
+    hint: 'Identify which position (ones, tens, hundreds...) the digit 5 sits in.',
+    explanation: 'In 4,586, the digit 5 is in the hundreds place, so its place value is 5 × 100 = 500.'
+  },
+  {
+    id: 'q-sci-7-easy-1',
+    subject: 'Science',
+    grade: 'Class 7',
+    chapter: 'Nutrition in Plants',
+    difficulty: 'Easy',
+    question: 'What is the green pigment in leaves that helps plants absorb sunlight for photosynthesis?',
+    options: ['Chlorophyll', 'Haemoglobin', 'Melanin', 'Cellulose'],
+    correctIndex: 0,
+    hint: 'This pigment gives leaves their colour.',
+    explanation: 'Chlorophyll is the green pigment present in leaves that absorbs sunlight, enabling plants to carry out photosynthesis and make their own food.'
+  },
+  {
+    id: 'q-math-7-easy-1',
+    subject: 'Mathematics',
+    grade: 'Class 7',
+    chapter: 'Fractions and Decimals',
+    difficulty: 'Easy',
+    question: 'What is 2/3 ÷ 1/2?',
+    options: ['4/3', '1/3', '2/6', '3/2'],
+    correctIndex: 0,
+    hint: 'Dividing by a fraction means multiplying by its reciprocal.',
+    explanation: '2/3 ÷ 1/2 = 2/3 × 2/1 = 4/3, since dividing by a fraction is the same as multiplying by its reciprocal.'
+  },
+  {
+    id: 'q-sci-8-easy-1',
+    subject: 'Science',
+    grade: 'Class 8',
+    chapter: 'Crop Production and Management',
+    difficulty: 'Easy',
+    question: 'Which of these is a Rabi crop, sown in the winter season?',
+    options: ['Wheat', 'Paddy (rice)', 'Maize', 'Cotton'],
+    correctIndex: 0,
+    hint: 'Think about crops that need cool weather to grow well.',
+    explanation: 'Wheat is a Rabi crop sown around November and harvested around March-April, as it needs the cool winter weather to grow well.'
+  },
+  {
+    id: 'q-math-8-easy-1',
+    subject: 'Mathematics',
+    grade: 'Class 8',
+    chapter: 'Rational Numbers',
+    difficulty: 'Easy',
+    question: 'What is the additive inverse of -3/4?',
+    options: ['3/4', '-3/4', '4/3', '-4/3'],
+    correctIndex: 0,
+    hint: 'The additive inverse of a number, added to itself, gives zero.',
+    explanation: 'The additive inverse of -3/4 is 3/4, because -3/4 + 3/4 = 0.'
   }
 ];
 
