@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BoardId, GradeId, LanguageCode, PracticeQuestion } from '../types';
 import { INITIAL_PRACTICE_QUESTIONS } from '../data/mockTeacherData';
+import { SUBJECTS } from '../data/curriculumData';
 import { fetchAdaptivePractice } from '../services/apiService';
 import {
   Sparkles,
@@ -31,66 +32,69 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
   language,
   onAskDoubtFromQuestion,
 }) => {
+  // Subjects offered for practice: strictly the ones registered for this board & grade.
+  // Social Science / Social Studies is intentionally excluded from Adaptive Practice
+  // (MCQ drills) for every class — it stays available in the Doubt Solver.
+  const availableSubjects = SUBJECTS.filter(
+    (s) => s.board === board && s.grades.includes(grade) && !s.name.toLowerCase().includes('social')
+  );
+
+  // Practice always asks which subject to focus on first — never silently mixes subjects.
+  const [practiceSubject, setPracticeSubject] = useState<string | null>(null);
   const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Challenging'>('Medium');
-
-  // Helper to get matching questions from catalog
-  const getCatalogQuestions = (diff: 'Easy' | 'Medium' | 'Challenging') => {
-    return INITIAL_PRACTICE_QUESTIONS.filter(
-      (q) =>
-        q.grade === grade &&
-        (q.subject === subject || subject.includes(q.subject) || q.subject.includes(subject)) &&
-        q.difficulty === diff
-    );
-  };
-
-  const [questions, setQuestions] = useState<PracticeQuestion[]>(() => {
-    const diffMatch = getCatalogQuestions('Medium');
-    if (diffMatch.length > 0) return diffMatch;
-    const gradeMatch = INITIAL_PRACTICE_QUESTIONS.filter(
-      (q) => q.grade === grade && (q.subject === subject || subject.includes(q.subject))
-    );
-    return gradeMatch.length > 0 ? gradeMatch : INITIAL_PRACTICE_QUESTIONS;
-  });
-
+  const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
   const [showHint, setShowHint] = useState<Record<string, boolean>>({});
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // Handle difficulty switch: instantly load questions for that difficulty or generate if needed
-  const handleDifficultyChange = async (newDiff: 'Easy' | 'Medium' | 'Challenging') => {
-    setDifficulty(newDiff);
-    setCurrentIndex(0);
+  // Strictly matches grade + this exact subject only — no fallback to other subjects.
+  const getCatalogQuestions = (subj: string, diff: 'Easy' | 'Medium' | 'Challenging') => {
+    return INITIAL_PRACTICE_QUESTIONS.filter((q) => q.grade === grade && q.subject === subj && q.difficulty === diff);
+  };
 
-    const matching = INITIAL_PRACTICE_QUESTIONS.filter(
-      (q) =>
-        (q.grade === grade || true) &&
-        (q.subject === subject || subject.includes(q.subject) || q.subject.includes(subject) || q.subject === 'Science' || q.subject === 'Mathematics') &&
-        q.difficulty === newDiff
-    );
-
+  const loadSubjectQuestions = async (subj: string, diff: 'Easy' | 'Medium' | 'Challenging') => {
+    const matching = getCatalogQuestions(subj, diff);
     if (matching.length > 0) {
       setQuestions(matching);
-    } else {
-      // Fetch new ones for this difficulty
-      setIsGenerating(true);
-      try {
-        const newQs = await fetchAdaptivePractice({
-          board,
-          subject,
-          grade,
-          difficulty: newDiff,
-        });
-        if (newQs && newQs.length > 0) {
-          setQuestions(newQs);
-        }
-      } finally {
-        setIsGenerating(false);
-      }
+      setCurrentIndex(0);
+      return;
+    }
+    // Nothing pre-written for this subject/difficulty — try generating some, but never
+    // substitute a different subject's or difficulty's questions.
+    setIsGenerating(true);
+    try {
+      const newQs = await fetchAdaptivePractice({ board, subject: subj, grade, difficulty: diff });
+      setQuestions(newQs.filter((q) => q.subject === subj && q.difficulty === diff));
+      setCurrentIndex(0);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
-  const currentQ = questions[currentIndex] || questions[0];
+  const handleChooseSubject = (subj: string) => {
+    setPracticeSubject(subj);
+    setSelectedAnswers({});
+    setShowHint({});
+    loadSubjectQuestions(subj, difficulty);
+  };
+
+  const handleDifficultyChange = (newDiff: 'Easy' | 'Medium' | 'Challenging') => {
+    setDifficulty(newDiff);
+    setSelectedAnswers({});
+    setShowHint({});
+    if (practiceSubject) loadSubjectQuestions(practiceSubject, newDiff);
+  };
+
+  const handleChangeSubject = () => {
+    setPracticeSubject(null);
+    setQuestions([]);
+    setCurrentIndex(0);
+    setSelectedAnswers({});
+    setShowHint({});
+  };
+
+  const currentQ = questions[currentIndex];
   const totalQ = questions.length;
   const answeredCount = Object.keys(selectedAnswers).length;
   const score = Object.entries(selectedAnswers).reduce((acc, [qId, ansIdx]) => {
@@ -99,7 +103,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
   }, 0);
 
   const handleSelectOption = (index: number) => {
-    if (selectedAnswers[currentQ.id] !== undefined) return;
+    if (!currentQ || selectedAnswers[currentQ.id] !== undefined) return;
     setSelectedAnswers((prev) => ({
       ...prev,
       [currentQ.id]: index,
@@ -107,18 +111,19 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
   };
 
   const handleGenerateMore = async () => {
+    if (!practiceSubject) return;
     setIsGenerating(true);
     try {
       const newQs = await fetchAdaptivePractice({
         board,
-        subject,
+        subject: practiceSubject,
         grade,
         chapter: currentQ?.chapter,
         difficulty,
       });
-
-      if (newQs && newQs.length > 0) {
-        setQuestions((prev) => [...prev, ...newQs]);
+      const strictlyMatching = newQs.filter((q) => q.subject === practiceSubject && q.difficulty === difficulty);
+      if (strictlyMatching.length > 0) {
+        setQuestions((prev) => [...prev, ...strictlyMatching]);
         setCurrentIndex(questions.length);
       }
     } finally {
@@ -126,8 +131,54 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
     }
   };
 
-  const hasAnsweredCurrent = selectedAnswers[currentQ?.id] !== undefined;
-  const isCurrentCorrect = selectedAnswers[currentQ?.id] === currentQ?.correctIndex;
+  const hasAnsweredCurrent = currentQ ? selectedAnswers[currentQ.id] !== undefined : false;
+  const isCurrentCorrect = currentQ ? selectedAnswers[currentQ.id] === currentQ.correctIndex : false;
+
+  // ---------- STEP 1: Ask which subject to practice ----------
+  if (!practiceSubject) {
+    return (
+      <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-6">
+        <div className="bg-gradient-to-r from-[#221631] to-[#3C1F4D] text-[#FFF6E9] p-6 rounded-3xl shadow-xl border border-white/10">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="p-1 rounded-lg bg-[#FF5F4E]/20 text-[#FFB937] border border-[#FFB937]/30">
+              <Zap className="w-4 h-4" />
+            </span>
+            <h1 className="font-display text-xl font-bold text-white">Adaptive Practice Generator</h1>
+          </div>
+          <p className="text-xs text-[#D9C9E6]">
+            Pick one subject to practice. Every question below will come from that subject only — no mixing.
+          </p>
+        </div>
+
+        <div className="bg-white p-6 rounded-3xl border border-[#E3D6BC] shadow-sm">
+          <h2 className="font-display font-bold text-base text-[#1B1330] mb-4">
+            Which subject would you like to practice? <span className="text-xs font-normal text-[#8A7A5C]">({board} · {grade})</span>
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {availableSubjects.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => handleChooseSubject(s.name)}
+                className="p-4 rounded-2xl text-left border-2 border-[#E3D6BC] bg-[#FFF6E9] hover:border-[#FF5F4E] hover:bg-white transition-all flex flex-col gap-1"
+              >
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-[#FF5F4E]" />
+                  <span className="font-display font-bold text-sm text-[#1B1330]">{s.name}</span>
+                </div>
+                <span className="text-[11px] text-[#8A7A5C]">{s.description}</span>
+              </button>
+            ))}
+            {availableSubjects.length === 0 && (
+              <p className="text-xs text-[#8A7A5C] col-span-2">
+                No subjects are set up yet for {board} · {grade}. Try a different class or board from the selector.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
@@ -141,8 +192,15 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
             <h1 className="font-display text-xl font-bold text-white">Adaptive Practice Generator</h1>
           </div>
           <p className="text-xs text-[#D9C9E6]">
-            Tailored secondary drills designed around known student confusions in {board} · {subject} · {grade}.
+            Tailored drills for {board} · {practiceSubject} · {grade}.
           </p>
+          <button
+            type="button"
+            onClick={handleChangeSubject}
+            className="mt-2 text-[11px] font-bold text-[#FFB937] hover:underline"
+          >
+            ← Choose a different subject
+          </button>
         </div>
 
         {/* Live Scorecard */}
@@ -157,7 +215,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
           <div className="text-center">
             <div className="text-[10px] uppercase font-bold text-[#D9C9E6] tracking-wider">Progress</div>
             <div className="font-display font-bold text-lg text-white">
-              {currentIndex + 1} / {totalQ}
+              {totalQ > 0 ? currentIndex + 1 : 0} / {totalQ}
             </div>
           </div>
         </div>
@@ -185,7 +243,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
 
         <button
           type="button"
-          disabled={isGenerating}
+          disabled={isGenerating || !currentQ}
           onClick={handleGenerateMore}
           className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#FF5F4E] to-[#FFB937] text-[#1B1330] font-bold flex items-center gap-1.5 hover:shadow-md transition active:scale-95 disabled:opacity-50"
         >
@@ -195,7 +253,11 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
       </div>
 
       {/* Main Question Card */}
-      {currentQ ? (
+      {isGenerating && !currentQ ? (
+        <div className="bg-white p-8 rounded-3xl text-center border border-[#E3D6BC]">
+          <p className="text-sm text-[#8A7A5C]">Generating {practiceSubject} questions…</p>
+        </div>
+      ) : currentQ ? (
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E3D6BC] shadow-md flex flex-col gap-6">
           {/* Question Meta */}
           <div className="flex items-center justify-between border-b border-[#E3D6BC] pb-3 text-xs">
@@ -319,7 +381,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                   type="button"
                   onClick={() =>
                     onAskDoubtFromQuestion(
-                      `I was practicing this question: "${currentQ.question}". Can you explain why the answer is "${currentQ.options[currentQ.correctIndex]}" step by step?`
+                      `I was practicing this question: "${currentQ.question}". Can you explain why the answer is "${currentQ.options[currentQ.correctIndex]}" step by step, in simple language with an example?`
                     )
                   }
                   className="text-xs font-bold text-[#FF5F4E] hover:underline flex items-center gap-1"
@@ -385,8 +447,18 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
           </div>
         </div>
       ) : (
-        <div className="bg-white p-8 rounded-3xl text-center border border-[#E3D6BC]">
-          <p className="text-sm text-[#8A7A5C]">No questions loaded for this subject. Click above to generate!</p>
+        <div className="bg-white p-8 rounded-3xl text-center border border-[#E3D6BC] space-y-3">
+          <p className="text-sm text-[#8A7A5C]">
+            No {difficulty.toLowerCase()} practice questions yet for {practiceSubject} · {grade}. Try a different difficulty level, or generate new ones below.
+          </p>
+          <button
+            type="button"
+            disabled={isGenerating}
+            onClick={handleGenerateMore}
+            className="px-4 py-2 rounded-xl text-xs font-bold bg-[#FF5F4E] text-white hover:bg-[#FF5F4E]/90 disabled:opacity-50"
+          >
+            {isGenerating ? 'Generating…' : 'Generate Practice Questions →'}
+          </button>
         </div>
       )}
     </div>
