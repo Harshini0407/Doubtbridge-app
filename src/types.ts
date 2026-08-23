@@ -60,6 +60,10 @@ export interface KnowledgeChunk {
   content: string;
   keyFormulas?: string[];
   summaryPoints?: string[];
+  /** One or two sentences in everyday language, no jargon — shown first, before the detailed textbook content. */
+  simpleExplanation?: string;
+  /** A short relatable real-life example or worked mini-example illustrating the concept. */
+  example?: string;
 }
 
 export interface ChatMessage {
